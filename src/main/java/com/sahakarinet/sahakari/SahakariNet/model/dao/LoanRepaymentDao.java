@@ -74,6 +74,23 @@ public class LoanRepaymentDao {
         return null;
     }
 
+    public LoanRepayment findById(int repaymentId) {
+        String sql = "SELECT lr.*, m.full_name AS member_name, m.phone AS member_phone " +
+                "FROM loan_repayments lr " +
+                "JOIN loans l ON lr.loan_id = l.id " +
+                "JOIN members m ON l.member_id = m.id " +
+                "WHERE lr.id = ?";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setInt(1, repaymentId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return mapLR(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean recordPayment(int repaymentId, double amount) {
         String sql = "UPDATE loan_repayments SET paid_amount = ?, paid_date = NOW(), is_defaulted = FALSE WHERE id = ?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
@@ -118,6 +135,20 @@ public class LoanRepaymentDao {
         String sql = "SELECT COUNT(*) FROM loan_repayments WHERE loan_id = ? AND paid_amount > 0";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             ps.setInt(1, loanId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countOverdueDefaulters(int overdueDays) {
+        String sql = "SELECT COUNT(*) FROM loan_repayments " +
+                "WHERE is_defaulted = TRUE AND due_date <= DATE_SUB(CURDATE(), INTERVAL ? DAY)";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setInt(1, overdueDays);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return rs.getInt(1);

@@ -27,15 +27,53 @@ public class LoanServlet extends HttpServlet {
 
         String action = req.getParameter("action");
         String ctx = req.getContextPath();
-        HttpSession session = req.getSession();
+        HttpSession session = req.getSession(false);
+
+        if (action == null || action.isBlank()) {
+            res.sendRedirect(ctx + "/member");
+            return;
+        }
+
+        if (session == null) {
+            res.sendRedirect(ctx + "/login.jsp");
+            return;
+        }
+
+        String role = (String) session.getAttribute("role");
 
         switch (action) {
             // Member applies for a loan
             case "apply": {
-                int memberId = (int) session.getAttribute("memberId");
-                double amount = Double.parseDouble(req.getParameter("amount"));
+                if (!"MEMBER".equals(role)) {
+                    res.sendRedirect(ctx + "/error.jsp?code=403");
+                    return;
+                }
+
+                Object memberIdObj = session.getAttribute("memberId");
+                if (!(memberIdObj instanceof Number)) {
+                    res.sendRedirect(ctx + "/login.jsp");
+                    return;
+                }
+
+                int memberId = ((Number) memberIdObj).intValue();
+                double amount;
+                int months;
+                try {
+                    amount = Double.parseDouble(req.getParameter("amount"));
+                    months = Integer.parseInt(req.getParameter("durationMonths"));
+                } catch (NumberFormatException ex) {
+                    req.setAttribute("error", "Please enter a valid loan amount and duration.");
+                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    return;
+                }
+
+                if (amount <= 0 || months <= 0) {
+                    req.setAttribute("error", "Loan amount and duration must be greater than zero.");
+                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    return;
+                }
+
                 String purpose = req.getParameter("purpose");
-                int months = Integer.parseInt(req.getParameter("durationMonths"));
                 double rate = 12.0; // default annual rate
 
                 double emi = InterestCalculator.calculateEMI(amount, rate, months);
@@ -60,8 +98,26 @@ public class LoanServlet extends HttpServlet {
 
             // Staff disburses an approved loan
             case "disburse": {
-                int loanId = Integer.parseInt(req.getParameter("loanId"));
-                int staffId = (int) session.getAttribute("userId");
+                if (!("STAFF".equals(role) || "ADMIN".equals(role))) {
+                    res.sendRedirect(ctx + "/error.jsp?code=403");
+                    return;
+                }
+
+                int loanId;
+                try {
+                    loanId = Integer.parseInt(req.getParameter("loanId"));
+                } catch (NumberFormatException ex) {
+                    res.sendRedirect(ctx + "/staff?page=loan-disburse&error=invalidLoan");
+                    return;
+                }
+
+                Object staffIdObj = session.getAttribute("userId");
+                if (!(staffIdObj instanceof Number)) {
+                    res.sendRedirect(ctx + "/login.jsp");
+                    return;
+                }
+
+                int staffId = ((Number) staffIdObj).intValue();
                 Loan loan = loanDAO.findById(loanId);
 
                 if (loan != null && "APPROVED".equals(loan.getStatus())) {

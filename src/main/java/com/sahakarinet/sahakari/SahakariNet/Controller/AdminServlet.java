@@ -43,6 +43,10 @@ public class AdminServlet extends HttpServlet {
                     Map<String, Object> stats = reportDAO.getDashboardStats();
                     req.setAttribute("stats", stats);
                     req.setAttribute("staffCount", staffDAO.getAll().size());
+                    req.setAttribute("pendingLoans", loanDAO.getByStatus("PENDING"));
+                    req.setAttribute("pendingMembers", memberDAO.getPending());
+                    req.setAttribute("recentTransactions", transactionDAO.getAll());
+                    req.setAttribute("severeDefaulters", repaymentDAO.countOverdueDefaulters(90));
                     req.getRequestDispatcher("/views/admin/dashboard.jsp").forward(req, res);
                     break;
                 }
@@ -199,9 +203,10 @@ public class AdminServlet extends HttpServlet {
                         if (userIdObj instanceof Number) {
                             int adminId = ((Number) userIdObj).intValue();
                             loanDAO.approve(loanId, adminId);
+                            res.sendRedirect(ctx + "/admin?page=loan-detail&id=" + loanId);
+                        } else {
+                            res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
                         }
-
-                        res.sendRedirect(ctx + "/admin?page=loan-detail&id=" + loanId);
                     } else {
                         res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
                     }
@@ -220,13 +225,13 @@ public class AdminServlet extends HttpServlet {
                         if (userIdObj instanceof Number) {
                             int adminId = ((Number) userIdObj).intValue();
                             loanDAO.reject(loanId, adminId);
+                            res.sendRedirect(ctx + "/admin?page=loans&msg=rejected");
+                        } else {
+                            res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
                         }
                     } else {
                         res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
-                        break;
                     }
-
-                    res.sendRedirect(ctx + "/admin?page=loans&msg=rejected");
                     break;
                 }
 

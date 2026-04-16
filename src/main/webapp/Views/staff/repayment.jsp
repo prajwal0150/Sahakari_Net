@@ -51,6 +51,7 @@
                     <div class="space-y-4">
                         <c:forEach var="loan" items="${loans}">
                             <c:if test="${loan.status == 'DISBURSED'}">
+                                <c:set var="nextDue" value="${nextDueByLoan[loan.id]}"/>
                                 <div class="bg-white rounded-2xl border border-gray-100 p-5">
                                     <div class="flex items-center justify-between mb-4">
                                         <div>
@@ -59,26 +60,33 @@
                                         </div>
                                         <span class="inline-block bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">ACTIVE</span>
                                     </div>
-                                    <form action="${pageContext.request.contextPath}/transaction" method="post" class="space-y-3">
-                                        <input type="hidden" name="action"   value="repayment">
-                                        <input type="hidden" name="loanId"   value="${loan.id}">
-                                        <input type="hidden" name="memberId" value="${member.id}">
-                                            <%-- Staff enters repayment ID manually or you can use a dropdown with next due instalment --%>
-                                        <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Repayment ID (from schedule)</label>
-                                            <input type="number" name="repaymentId" required placeholder="Enter repayment ID"
-                                                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-gray-50">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-semibold text-gray-600 mb-1">Amount Paid (Rs.) — EMI: Rs. <fmt:formatNumber value="${loan.monthlyEmi}" pattern="#,##0.00"/></label>
-                                            <input type="number" name="amount" min="1" step="0.01" required
-                                                   value="${loan.monthlyEmi}" placeholder="0.00"
-                                                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-gray-50">
-                                        </div>
-                                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
-                                            Record Payment
-                                        </button>
-                                    </form>
+                                    <c:choose>
+                                        <c:when test="${nextDue != null}">
+                                            <form action="${pageContext.request.contextPath}/transaction" method="post" class="space-y-3">
+                                                <input type="hidden" name="action" value="repayment">
+                                                <input type="hidden" name="loanId" value="${loan.id}">
+                                                <input type="hidden" name="memberId" value="${member.id}">
+                                                <input type="hidden" name="repaymentId" value="${nextDue.id}">
+                                                <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+                                                    Next instalment #${nextDue.instalmentNo} due on <fmt:formatDate value="${nextDue.dueDate}" pattern="dd MMM yyyy"/>.
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Amount Paid (Rs.) — Due: Rs. <fmt:formatNumber value="${nextDue.dueAmount}" pattern="#,##0.00"/></label>
+                                                    <input type="number" name="amount" min="1" step="0.01" required
+                                                           value="${nextDue.dueAmount}" placeholder="0.00"
+                                                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-gray-50">
+                                                </div>
+                                                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition">
+                                                    Record Payment
+                                                </button>
+                                            </form>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700 font-semibold">
+                                                All instalments for this loan are already paid.
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </c:if>
                         </c:forEach>

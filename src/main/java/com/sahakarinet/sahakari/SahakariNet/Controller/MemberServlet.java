@@ -24,56 +24,84 @@ public class MemberServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession();
-        int memberId = (int) session.getAttribute("memberId");
-        String page = req.getParameter("page");
-        if (page == null)
-            page = "dashboard";
+        try {
+            HttpSession session = req.getSession(false);
+            Object memberIdObj = session != null ? session.getAttribute("memberId") : null;
+            if (!(memberIdObj instanceof Number)) {
+                res.sendRedirect(req.getContextPath() + "/login.jsp");
+                return;
+            }
+            int memberId = ((Number) memberIdObj).intValue();
+            String page = req.getParameter("page");
+            if (page == null)
+                page = "dashboard";
 
-        switch (page) {
-            case "dashboard": {
-                req.setAttribute("member", memberDAO.findById(memberId));
-                req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                req.setAttribute("recentTx", txDAO.getRecent(memberId, 5));
-                req.setAttribute("loans", loanDAO.getByMemberId(memberId));
-                req.getRequestDispatcher("/views/member/dashboard.jsp").forward(req, res);
-                break;
+            switch (page) {
+                case "dashboard": {
+                    req.setAttribute("member", memberDAO.findById(memberId));
+                    req.setAttribute("savings", saDAO.getByMemberId(memberId));
+                    req.setAttribute("recentTx", txDAO.getRecent(memberId, 5));
+                    req.setAttribute("loans", loanDAO.getByMemberId(memberId));
+                    req.getRequestDispatcher("/views/member/dashboard.jsp").forward(req, res);
+                    break;
+                }
+                case "savings": {
+                    req.setAttribute("savings", saDAO.getByMemberId(memberId));
+                    req.setAttribute("txHistory", txDAO.getByMemberId(memberId));
+                    req.getRequestDispatcher("/views/member/saving.jsp").forward(req, res);
+                    break;
+                }
+                case "transactions": {
+                    req.setAttribute("transactions", txDAO.getByMemberId(memberId));
+                    req.getRequestDispatcher("/views/member/transaction.jsp").forward(req, res);
+                    break;
+                }
+                case "apply-loan": {
+                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    break;
+                }
+                case "my-loans": {
+                    req.setAttribute("loans", loanDAO.getByMemberId(memberId));
+                    req.getRequestDispatcher("/views/member/my_loan.jsp").forward(req, res);
+                    break;
+                }
+                case "repayment-schedule": {
+                    String loanIdParam = req.getParameter("loanId");
+                    if (loanIdParam == null || loanIdParam.isBlank()) {
+                        res.sendRedirect(req.getContextPath() + "/member?page=my-loans");
+                        break;
+                    }
+                    int loanId;
+                    try {
+                        loanId = Integer.parseInt(loanIdParam);
+                    } catch (NumberFormatException ex) {
+                        res.sendRedirect(req.getContextPath() + "/member?page=my-loans");
+                        break;
+                    }
+
+                    var loan = loanDAO.findById(loanId);
+                    if (loan == null || loan.getMemberId() != memberId) {
+                        res.sendRedirect(req.getContextPath() + "/member?page=my-loans");
+                        return;
+                    }
+
+                    req.setAttribute("loan", loan);
+                    req.setAttribute("schedule", lrDAO.getByLoanId(loanId));
+                    req.getRequestDispatcher("/views/member/repayment.jsp").forward(req, res);
+                    break;
+                }
+                case "profile": {
+                    req.setAttribute("member", memberDAO.findById(memberId));
+                    req.setAttribute("savings", saDAO.getByMemberId(memberId));
+                    req.getRequestDispatcher("/views/member/profile.jsp").forward(req, res);
+                    break;
+                }
+                default:
+                    res.sendRedirect(req.getContextPath() + "/member");
             }
-            case "savings": {
-                req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                req.setAttribute("txHistory", txDAO.getByMemberId(memberId));
-                req.getRequestDispatcher("/views/member/saving.jsp").forward(req, res);
-                break;
-            }
-            case "transactions": {
-                req.setAttribute("transactions", txDAO.getByMemberId(memberId));
-                req.getRequestDispatcher("/views/member/transaction.jsp").forward(req, res);
-                break;
-            }
-            case "apply-loan": {
-                req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
-                break;
-            }
-            case "my-loans": {
-                req.setAttribute("loans", loanDAO.getByMemberId(memberId));
-                req.getRequestDispatcher("/views/member/my_loan.jsp").forward(req, res);
-                break;
-            }
-            case "repayment-schedule": {
-                int loanId = Integer.parseInt(req.getParameter("loanId"));
-                req.setAttribute("loan", loanDAO.findById(loanId));
-                req.setAttribute("schedule", lrDAO.getByLoanId(loanId));
-                req.getRequestDispatcher("/views/member/repayment.jsp").forward(req, res);
-                break;
-            }
-            case "profile": {
-                req.setAttribute("member", memberDAO.findById(memberId));
-                req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                req.getRequestDispatcher("/views/member/profile.jsp").forward(req, res);
-                break;
-            }
-            default:
-                res.sendRedirect(req.getContextPath() + "/member");
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.sendRedirect(req.getContextPath() + "/member?error=Something went wrong");
         }
     }
 }

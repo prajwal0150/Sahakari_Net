@@ -51,7 +51,7 @@
         <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <h2 class="text-sm font-bold text-gray-700 mb-4">Create Staff Account</h2>
           <p class="text-xs text-gray-500 mb-4">Username is set as staff email. Staff can login with that email and the password you set below.</p>
-          <form action="${pageContext.request.contextPath}/admin" method="post" class="space-y-3">
+          <form action="${pageContext.request.contextPath}/admin" method="post" class="space-y-3" autocomplete="off">
             <input type="hidden" name="action" value="create-staff">
 
             <div>
@@ -71,14 +71,13 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-              <input type="email" name="email" required
+                  <input type="email" name="email" required autocomplete="off"
                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
-              <input type="password" name="password" required minlength="6"
-                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50"
-                   placeholder="Set staff login password">
+                  <input type="password" name="password" required minlength="6" autocomplete="new-password"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Phone Number</label>

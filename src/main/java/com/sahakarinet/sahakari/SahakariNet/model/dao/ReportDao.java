@@ -19,10 +19,11 @@ public class ReportDao {
     /** Monthly deposits summary — last 6 months */
     public List<Map<String, Object>> monthlySavings() {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT DATE_FORMAT(transaction_date,'%b %Y') AS month, " +
+        String sql = "SELECT DATE_FORMAT(MIN(transaction_date),'%b %Y') AS month, " +
                 "SUM(amount) AS total FROM transactions " +
                 "WHERE type='DEPOSIT' AND transaction_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH) " +
-                "GROUP BY DATE_FORMAT(transaction_date,'%Y-%m') ORDER BY MIN(transaction_date) ASC";
+                "GROUP BY YEAR(transaction_date), MONTH(transaction_date) " +
+                "ORDER BY YEAR(transaction_date), MONTH(transaction_date) ASC";
         try (Statement st = conn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Map<String, Object> row = new LinkedHashMap<>();

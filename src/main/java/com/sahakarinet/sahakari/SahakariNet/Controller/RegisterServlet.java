@@ -39,14 +39,22 @@ public class RegisterServlet extends HttpServlet {
         String password = req.getParameter("password");
         String confirmPw = req.getParameter("confirmPassword");
 
+        String normalizedFullName = fullName != null ? fullName.trim() : "";
+        String normalizedGender = gender != null ? gender.trim() : "";
+        String normalizedPhone = phone != null ? phone.trim() : "";
+        String normalizedAddress = address != null ? address.trim() : "";
+        String normalizedCitizenship = citizenshipNo != null ? citizenshipNo.trim() : "";
+        String normalizedEmail = email != null ? email.trim() : "";
+        String normalizedUsername = username != null ? username.trim() : "";
+
         // Validation
-        if (ValidationUtil.isNullOrEmpty(fullName) || ValidationUtil.isNullOrEmpty(username)
-                || ValidationUtil.isNullOrEmpty(password) || ValidationUtil.isNullOrEmpty(gender)) {
+        if (ValidationUtil.isNullOrEmpty(normalizedFullName) || ValidationUtil.isNullOrEmpty(normalizedUsername)
+                || ValidationUtil.isNullOrEmpty(password) || ValidationUtil.isNullOrEmpty(normalizedGender)) {
             req.setAttribute("error", "All fields are required.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (!password.equals(confirmPw)) {
+        if (confirmPw == null || !password.equals(confirmPw)) {
             req.setAttribute("error", "Passwords do not match.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
@@ -56,32 +64,32 @@ public class RegisterServlet extends HttpServlet {
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (email != null && !email.isBlank() && !ValidationUtil.isValidEmail(email.trim())) {
+        if (!normalizedEmail.isBlank() && !ValidationUtil.isValidEmail(normalizedEmail)) {
             req.setAttribute("error", "Invalid email format.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (phone != null && !phone.isBlank() && !ValidationUtil.isValidPhone(phone.trim())) {
+        if (!normalizedPhone.isBlank() && !ValidationUtil.isValidPhone(normalizedPhone)) {
             req.setAttribute("error", "Invalid phone number. Use 97xxxxxxxx or 98xxxxxxxx.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (userDAO.usernameExists(username.trim())) {
+        if (userDAO.usernameExists(normalizedUsername)) {
             req.setAttribute("error", "Username '" + username + "' is already taken.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (email != null && !email.isBlank() && userDAO.emailExists(email.trim())) {
+        if (!normalizedEmail.isBlank() && userDAO.emailExists(normalizedEmail)) {
             req.setAttribute("error", "Email is already registered.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (citizenshipNo == null || citizenshipNo.isBlank()) {
+        if (normalizedCitizenship.isBlank()) {
             req.setAttribute("error", "Citizenship number is required for member registration.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (memberDAO.citizenshipExists(citizenshipNo.trim())) {
+        if (memberDAO.citizenshipExists(normalizedCitizenship)) {
             req.setAttribute("error", "Citizenship number is already registered.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
@@ -89,8 +97,8 @@ public class RegisterServlet extends HttpServlet {
 
         // Create user
         User newUser = new User();
-        newUser.setUsername(username.trim());
-        newUser.setEmail(email != null ? email.trim() : "");
+        newUser.setUsername(normalizedUsername);
+        newUser.setEmail(normalizedEmail);
         newUser.setPasswordHash(PasswordUtil.hash(password));
         newUser.setRole("MEMBER");
         newUser.setActive(false);
@@ -105,12 +113,12 @@ public class RegisterServlet extends HttpServlet {
         // Create member
         Member newMember = new Member();
         newMember.setUserId(userId);
-        newMember.setFullName(fullName.trim());
+        newMember.setFullName(normalizedFullName);
         newMember.setDateOfBirth(dob);
-        newMember.setGender(gender.trim());
-        newMember.setPhone(phone.trim());
-        newMember.setAddress(address.trim());
-        newMember.setCitizenshipNo(citizenshipNo.trim());
+        newMember.setGender(normalizedGender);
+        newMember.setPhone(normalizedPhone);
+        newMember.setAddress(normalizedAddress);
+        newMember.setCitizenshipNo(normalizedCitizenship);
         newMember.setStatus("PENDING");
 
         boolean saved = memberDAO.registerMember(newMember);

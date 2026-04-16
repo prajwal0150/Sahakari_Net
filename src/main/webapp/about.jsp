@@ -13,7 +13,6 @@
 </head>
 <body class="bg-gradient-to-br from-sky-50 via-white to-emerald-50 min-h-screen text-gray-800">
 <% String ctx = request.getContextPath(); %>
-
 <nav class="bg-white/90 backdrop-blur border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="<%= ctx %>/index.jsp" class="flex items-center gap-3">
