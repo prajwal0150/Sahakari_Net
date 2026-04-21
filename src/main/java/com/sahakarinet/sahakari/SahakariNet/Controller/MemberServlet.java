@@ -42,27 +42,27 @@ public class MemberServlet extends HttpServlet {
                     req.setAttribute("savings", saDAO.getByMemberId(memberId));
                     req.setAttribute("recentTx", txDAO.getRecent(memberId, 5));
                     req.setAttribute("loans", loanDAO.getByMemberId(memberId));
-                    req.getRequestDispatcher("/views/member/dashboard.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/dashboard.jsp").forward(req, res);
                     break;
                 }
                 case "savings": {
                     req.setAttribute("savings", saDAO.getByMemberId(memberId));
                     req.setAttribute("txHistory", txDAO.getByMemberId(memberId));
-                    req.getRequestDispatcher("/views/member/saving.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/saving.jsp").forward(req, res);
                     break;
                 }
                 case "transactions": {
                     req.setAttribute("transactions", txDAO.getByMemberId(memberId));
-                    req.getRequestDispatcher("/views/member/transaction.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/transaction.jsp").forward(req, res);
                     break;
                 }
                 case "apply-loan": {
-                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/apply_loan.jsp").forward(req, res);
                     break;
                 }
                 case "my-loans": {
                     req.setAttribute("loans", loanDAO.getByMemberId(memberId));
-                    req.getRequestDispatcher("/views/member/my_loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/my_loan.jsp").forward(req, res);
                     break;
                 }
                 case "repayment-schedule": {
@@ -87,13 +87,13 @@ public class MemberServlet extends HttpServlet {
 
                     req.setAttribute("loan", loan);
                     req.setAttribute("schedule", lrDAO.getByLoanId(loanId));
-                    req.getRequestDispatcher("/views/member/repayment.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/repayment.jsp").forward(req, res);
                     break;
                 }
                 case "profile": {
                     req.setAttribute("member", memberDAO.findById(memberId));
                     req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                    req.getRequestDispatcher("/views/member/profile.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/profile.jsp").forward(req, res);
                     break;
                 }
                 default:

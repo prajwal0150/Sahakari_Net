@@ -85,6 +85,58 @@ public class TransactionDao {
         return list;
     }
 
+    public List<Transaction> getByType(String type) {
+        List<Transaction> list = new ArrayList<>();
+        String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
+                "FROM transactions t JOIN members m ON t.member_id = m.id " +
+                "JOIN users u ON t.recorded_by = u.id WHERE t.type = ? ORDER BY t.transaction_date DESC LIMIT 50";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, type);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                list.add(mapTx(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Transaction> getByTypeWithLimit(String type, int limit) {
+        List<Transaction> list = new ArrayList<>();
+        String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
+                "FROM transactions t JOIN members m ON t.member_id = m.id " +
+                "JOIN users u ON t.recorded_by = u.id WHERE t.type = ? ORDER BY t.transaction_date DESC LIMIT ?";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, type);
+            ps.setInt(2, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                list.add(mapTx(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Transaction> getByTypeAndMemberWithLimit(String type, int memberId, int limit) {
+        List<Transaction> list = new ArrayList<>();
+        String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
+                "FROM transactions t JOIN members m ON t.member_id = m.id " +
+                "JOIN users u ON t.recorded_by = u.id " +
+                "WHERE t.type = ? AND t.member_id = ? ORDER BY t.transaction_date DESC LIMIT ?";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, type);
+            ps.setInt(2, memberId);
+            ps.setInt(3, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next())
+                list.add(mapTx(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public int countTodayByStaff(int staffUserId) {
         String sql = "SELECT COUNT(*) FROM transactions WHERE recorded_by = ? AND DATE(transaction_date) = CURDATE()";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {

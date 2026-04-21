@@ -10,13 +10,13 @@
 <c:set var="uname" value="${sessionScope.username}"/>
 
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-40 flex flex-col transition-transform duration-300 lg:translate-x-0 -translate-x-full" id="sidebar">
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-50 text-gray-900 z-40 flex flex-col border-r border-gray-200 shadow-sm transition-transform duration-300 lg:translate-x-0 -translate-x-full">
     <!-- Logo -->
-    <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-        <div class="w-9 h-9 bg-green-500 rounded-xl flex items-center justify-center font-bold text-gray-900 text-lg">S</div>
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-200">
+        <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-lg">S</div>
         <div>
-            <div class="font-bold text-white text-sm leading-tight">SahakariNet</div>
-            <div class="text-xs text-gray-400 capitalize">${role != null ? role.toLowerCase() : ''} panel</div>
+            <div class="font-semibold text-gray-900 text-sm leading-tight">SahakariNet</div>
+            <div class="text-xs text-gray-500 capitalize">${role != null ? role.toLowerCase() : ''} panel</div>
         </div>
     </div>
 
@@ -54,17 +54,17 @@
     </nav>
 
     <!-- User + logout -->
-    <div class="px-4 py-4 border-t border-gray-700">
+    <div class="px-4 py-4 border-t border-gray-200 bg-white/70">
         <div class="flex items-center gap-3 mb-3">
-            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-gray-900 font-bold text-xs uppercase">
+            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">
                 ${uname != null ? uname.substring(0,1) : 'U'}
             </div>
             <div>
-                <div class="text-xs font-medium text-white">${uname}</div>
-                <div class="text-xs text-gray-400">${role}</div>
+                <div class="text-xs font-medium text-gray-800">${uname}</div>
+                <div class="text-xs text-gray-500">${role}</div>
             </div>
         </div>
-        <a href="${ctx}/logout" class="flex items-center gap-2 text-xs text-gray-400 hover:text-red-400 transition-colors">
+        <a href="${ctx}/logout" class="flex items-center gap-2 text-xs text-gray-500 hover:text-red-500 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             Logout
         </a>
@@ -75,21 +75,36 @@
 <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
 <!-- Mobile toggle button -->
-<button onclick="toggleSidebar()" class="fixed top-4 left-4 z-50 lg:hidden bg-gray-900 text-white p-2 rounded-lg">
+<button onclick="toggleSidebar()" class="fixed top-4 left-4 z-50 lg:hidden bg-white border border-gray-200 text-gray-700 p-2 rounded-lg shadow-sm">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
 </button>
 
 <style>
     .nav-link {
-        display: flex; align-items: center; gap: 10px;
-        padding: 8px 12px; border-radius: 8px;
-        font-size: 13px; color: #9ca3af;
-        text-decoration: none; transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        transition: all 0.15s ease;
     }
-    .nav-link:hover, .nav-link.active {
-        background: #1f2937; color: #ffffff;
+    .nav-link:hover {
+        background: #f3f4f6;
+        color: #111827;
     }
-    .nav-link svg { flex-shrink: 0; }
+    .nav-link.active {
+        background: #dbeafe;
+        color: #2563eb;
+        font-weight: 600;
+    }
+    .nav-link svg {
+        flex-shrink: 0;
+        opacity: 0.9;
+    }
 </style>
 <script>
     function toggleSidebar() {
@@ -98,8 +113,32 @@
         sb.classList.toggle('-translate-x-full');
         ov.classList.toggle('hidden');
     }
-    // Mark active link
-    document.querySelectorAll('.nav-link').forEach(a => {
-        if (window.location.href.includes(a.getAttribute('href'))) a.classList.add('active');
-    });
+
+    // Mark active link using exact path + page query matching.
+    // This prevents /staff?page=deposit from also activating /staff (Dashboard).
+    (function markActiveNavLink() {
+        const currentUrl = new URL(window.location.href);
+        const currentPath = currentUrl.pathname;
+        const currentPage = currentUrl.searchParams.get('page');
+
+        document.querySelectorAll('.nav-link').forEach((link) => {
+            const href = link.getAttribute('href');
+            if (!href)
+                return;
+
+            const linkUrl = new URL(href, window.location.origin);
+            if (linkUrl.pathname !== currentPath)
+                return;
+
+            const linkPage = linkUrl.searchParams.get('page');
+
+            if (linkPage) {
+                if (linkPage === currentPage) {
+                    link.classList.add('active');
+                }
+            } else if (!currentPage) {
+                link.classList.add('active');
+            }
+        });
+    })();
 </script>

@@ -20,10 +20,10 @@ public class AuthFilter implements Filter {
 
         // ✅ Allow public resources (IMPORTANT to avoid infinite redirect)
         if (uri.endsWith("login.jsp") ||
-            uri.endsWith("register.jsp") ||
-            uri.contains("/css/") ||
-            uri.contains("/js/") ||
-            uri.contains("/images/")) {
+                uri.endsWith("register.jsp") ||
+                uri.contains("/css/") ||
+                uri.contains("/js/") ||
+                uri.contains("/images/")) {
 
             chain.doFilter(req, res);
             return;
@@ -38,11 +38,11 @@ public class AuthFilter implements Filter {
         }
 
         // ✅ Safer path checks (use startsWith instead of contains)
-        boolean adminPath  = uri.startsWith(ctx + "/admin")  || uri.startsWith(ctx + "/views/admin");
-        boolean staffPath  = uri.startsWith(ctx + "/staff")  || uri.startsWith(ctx + "/views/staff");
-        boolean memberPath = uri.startsWith(ctx + "/member") || uri.startsWith(ctx + "/views/member");
-        boolean loanPath   = uri.startsWith(ctx + "/loan");
-        boolean txPath     = uri.startsWith(ctx + "/transaction");
+        boolean adminPath = uri.startsWith(ctx + "/admin") || uri.startsWith(ctx + "/Views/admin");
+        boolean staffPath = uri.startsWith(ctx + "/staff") || uri.startsWith(ctx + "/Views/staff");
+        boolean memberPath = uri.startsWith(ctx + "/member") || uri.startsWith(ctx + "/Views/member");
+        boolean loanPath = uri.startsWith(ctx + "/loan");
+        boolean txPath = uri.startsWith(ctx + "/transaction");
         boolean reportPath = uri.startsWith(ctx + "/report");
 
         // 🔐 Role-based access control

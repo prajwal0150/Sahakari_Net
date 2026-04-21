@@ -63,13 +63,13 @@ public class LoanServlet extends HttpServlet {
                     months = Integer.parseInt(req.getParameter("durationMonths"));
                 } catch (NumberFormatException ex) {
                     req.setAttribute("error", "Please enter a valid loan amount and duration.");
-                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/apply_loan.jsp").forward(req, res);
                     return;
                 }
 
                 if (amount <= 0 || months <= 0) {
                     req.setAttribute("error", "Loan amount and duration must be greater than zero.");
-                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/apply_loan.jsp").forward(req, res);
                     return;
                 }
 
@@ -91,7 +91,7 @@ public class LoanServlet extends HttpServlet {
                     res.sendRedirect(ctx + "/member?page=my-loans&msg=applied");
                 } else {
                     req.setAttribute("error", "Loan application failed.");
-                    req.getRequestDispatcher("/views/member/apply_loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/member/apply_loan.jsp").forward(req, res);
                 }
                 break;
             }

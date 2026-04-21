@@ -28,6 +28,36 @@ public class StaffServlet extends HttpServlet {
     private StaffDao staffDAO = new StaffDao();
     private UserDao userDAO = new UserDao();
 
+    private Member resolveMemberSearch(String query) {
+        if (query == null || query.isBlank()) {
+            return null;
+        }
+
+        String trimmed = query.trim();
+        List<Member> found = memberDAO.search(trimmed);
+        if (found.isEmpty()) {
+            return null;
+        }
+
+        for (Member member : found) {
+            if (matchesExactly(member.getFullName(), trimmed)
+                    || matchesExactly(member.getPhone(), trimmed)
+                    || matchesExactly(member.getCitizenshipNo(), trimmed)) {
+                return member;
+            }
+        }
+
+        if (found.size() == 1) {
+            return found.get(0);
+        }
+
+        return null;
+    }
+
+    private boolean matchesExactly(String value, String query) {
+        return value != null && value.trim().equalsIgnoreCase(query);
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -49,17 +79,29 @@ public class StaffServlet extends HttpServlet {
                     req.setAttribute("totalMembers", memberDAO.countByStatus("APPROVED"));
                     req.setAttribute("activeLoans", loanDAO.countByStatus("DISBURSED"));
                     req.setAttribute("recentTx", txDAO.getAll().stream().limit(10).toList());
-                    req.getRequestDispatcher("/views/staff/dashboard.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/staff/dashboard.jsp").forward(req, res);
                     break;
                 }
                 case "search": {
                     String q = req.getParameter("q");
+                    String memberId = req.getParameter("memberId");
                     List<Member> members = (q != null && !q.isBlank())
                             ? memberDAO.search(q)
                             : List.of();
+                    Member selectedMember = null;
+                    if (memberId != null && !memberId.isBlank()) {
+                        try {
+                            selectedMember = memberDAO.findById(Integer.parseInt(memberId));
+                        } catch (NumberFormatException ex) {
+                            // Ignore invalid memberId
+                        }
+                    }
                     req.setAttribute("members", members);
                     req.setAttribute("q", q);
-                    req.getRequestDispatcher("/views/staff/search_member.jsp").forward(req, res);
+                    req.setAttribute("selectedMember", selectedMember);
+                    req.setAttribute("searchMemberHistory",
+                            selectedMember != null ? txDAO.getRecent(selectedMember.getId(), 20) : List.of());
+                    req.getRequestDispatcher("/Views/staff/search_member.jsp").forward(req, res);
                     break;
                 }
                 case "member-detail": {
@@ -76,39 +118,81 @@ public class StaffServlet extends HttpServlet {
                     req.setAttribute("savings", saDAO.getByMemberId(memberId));
                     req.setAttribute("loans", loanDAO.getByMemberId(memberId));
                     req.setAttribute("recentTx", txDAO.getRecent(memberId, 10));
-                    req.getRequestDispatcher("/views/staff/member_detail.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/staff/member_detail.jsp").forward(req, res);
                     break;
                 }
                 case "deposit": {
+                    String q = req.getParameter("q");
                     String memberId = req.getParameter("memberId");
-                    if (memberId != null) {
+                    Member selectedMember = null;
+                    List<Member> memberSearchMembers = List.of();
+
+                    if (memberId != null && !memberId.isBlank()) {
                         try {
                             int mId = Integer.parseInt(memberId);
-                            req.setAttribute("member", memberDAO.findById(mId));
-                            req.setAttribute("savings", saDAO.getByMemberId(mId));
+                            selectedMember = memberDAO.findById(mId);
                         } catch (NumberFormatException ex) {
                             // Ignore invalid memberId
                         }
+                    } else if (q != null && !q.isBlank()) {
+                        selectedMember = resolveMemberSearch(q);
+                        if (selectedMember == null) {
+                            memberSearchMembers = memberDAO.search(q.trim());
+                        }
                     }
-                    req.getRequestDispatcher("/views/staff/deposit.jsp").forward(req, res);
+
+                    req.setAttribute("q", q);
+                    req.setAttribute("memberSearchMembers", memberSearchMembers);
+                    if (selectedMember != null) {
+                        req.setAttribute("member", selectedMember);
+                        req.setAttribute("savings", saDAO.getByMemberId(selectedMember.getId()));
+                    }
+
+                    req.setAttribute("depositHistory",
+                            selectedMember != null
+                                    ? txDAO.getByTypeAndMemberWithLimit("DEPOSIT", selectedMember.getId(), 20)
+                                    : txDAO.getByTypeWithLimit("DEPOSIT", 20));
+                    req.getRequestDispatcher("/Views/staff/deposit.jsp").forward(req, res);
                     break;
                 }
                 case "withdrawal": {
+                    String q = req.getParameter("q");
                     String memberId = req.getParameter("memberId");
-                    if (memberId != null) {
+                    Member selectedMember = null;
+                    List<Member> memberSearchMembers = List.of();
+
+                    if (memberId != null && !memberId.isBlank()) {
                         try {
                             int mId = Integer.parseInt(memberId);
-                            req.setAttribute("member", memberDAO.findById(mId));
-                            req.setAttribute("savings", saDAO.getByMemberId(mId));
+                            selectedMember = memberDAO.findById(mId);
                         } catch (NumberFormatException ex) {
                             // Ignore invalid memberId
                         }
+                    } else if (q != null && !q.isBlank()) {
+                        selectedMember = resolveMemberSearch(q);
+                        if (selectedMember == null) {
+                            memberSearchMembers = memberDAO.search(q.trim());
+                        }
                     }
-                    req.getRequestDispatcher("/views/staff/withdrawal.jsp").forward(req, res);
+
+                    req.setAttribute("q", q);
+                    req.setAttribute("memberSearchMembers", memberSearchMembers);
+                    if (selectedMember != null) {
+                        req.setAttribute("member", selectedMember);
+                        req.setAttribute("savings", saDAO.getByMemberId(selectedMember.getId()));
+                    }
+
+                    req.setAttribute("withdrawalHistory",
+                            selectedMember != null
+                                    ? txDAO.getByTypeAndMemberWithLimit("WITHDRAWAL", selectedMember.getId(), 20)
+                                    : txDAO.getByTypeWithLimit("WITHDRAWAL", 20));
+                    req.getRequestDispatcher("/Views/staff/withdrawal.jsp").forward(req, res);
                     break;
                 }
                 case "loan-disburse": {
                     String loanId = req.getParameter("loanId");
+                    String memberId = req.getParameter("memberId");
+                    Member selectedMember = null;
                     if (loanId != null) {
                         try {
                             req.setAttribute("loan", loanDAO.findById(Integer.parseInt(loanId)));
@@ -116,13 +200,37 @@ public class StaffServlet extends HttpServlet {
                             // Ignore invalid loanId
                         }
                     }
-                    req.setAttribute("approvedLoans", loanDAO.getByStatus("APPROVED"));
-                    req.getRequestDispatcher("/views/staff/loan_disbure.jsp").forward(req, res);
+                    if (memberId != null && !memberId.isBlank()) {
+                        try {
+                            selectedMember = memberDAO.findById(Integer.parseInt(memberId));
+                        } catch (NumberFormatException ex) {
+                            // Ignore invalid memberId
+                        }
+                    }
+
+                    List<com.sahakarinet.sahakari.SahakariNet.model.Loan> approvedLoans = loanDAO
+                            .getByStatus("APPROVED");
+                    if (selectedMember != null) {
+                        int selectedMemberId = selectedMember.getId();
+                        approvedLoans = approvedLoans.stream()
+                                .filter(l -> l.getMemberId() == selectedMemberId)
+                                .toList();
+                    }
+
+                    req.setAttribute("selectedMember", selectedMember);
+                    req.setAttribute("approvedLoans", approvedLoans);
+                    req.setAttribute("loanDisburseHistory",
+                            selectedMember != null
+                                    ? txDAO.getByTypeAndMemberWithLimit("LOAN_DISBURSE", selectedMember.getId(), 20)
+                                    : txDAO.getByTypeWithLimit("LOAN_DISBURSE", 20));
+                    req.getRequestDispatcher("/Views/staff/loan_disbure.jsp").forward(req, res);
                     break;
                 }
                 case "repayment": {
                     String memberId = req.getParameter("memberId");
+                    String q = req.getParameter("q");
                     Member selectedMember = null;
+                    List<Member> memberSearchMembers = List.of();
                     if (memberId != null) {
                         try {
                             selectedMember = memberDAO.findById(Integer.parseInt(memberId));
@@ -130,14 +238,16 @@ public class StaffServlet extends HttpServlet {
                             // Ignore invalid memberId
                         }
                     } else {
-                        String q = req.getParameter("q");
                         if (q != null && !q.isBlank()) {
-                            List<Member> found = memberDAO.search(q.trim());
-                            if (!found.isEmpty()) {
-                                selectedMember = found.get(0);
+                            selectedMember = resolveMemberSearch(q);
+                            if (selectedMember == null) {
+                                memberSearchMembers = memberDAO.search(q.trim());
                             }
                         }
                     }
+
+                    req.setAttribute("q", q);
+                    req.setAttribute("memberSearchMembers", memberSearchMembers);
 
                     if (selectedMember != null) {
                         req.setAttribute("member", selectedMember);
@@ -153,7 +263,12 @@ public class StaffServlet extends HttpServlet {
                         req.setAttribute("nextDueByLoan", nextDueByLoan);
                     }
 
-                    req.getRequestDispatcher("/views/staff/repayment.jsp").forward(req, res);
+                    req.setAttribute("repaymentHistory",
+                            selectedMember != null
+                                    ? txDAO.getByTypeAndMemberWithLimit("LOAN_REPAYMENT", selectedMember.getId(), 20)
+                                    : txDAO.getByTypeWithLimit("LOAN_REPAYMENT", 20));
+
+                    req.getRequestDispatcher("/Views/staff/repayment.jsp").forward(req, res);
                     break;
                 }
                 case "profile": {
@@ -164,7 +279,7 @@ public class StaffServlet extends HttpServlet {
                         uid = ((Number) userIdObj).intValue();
                     }
                     req.setAttribute("staff", staffDAO.findByUserId(uid));
-                    req.getRequestDispatcher("/views/staff/profile.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/staff/profile.jsp").forward(req, res);
                     break;
                 }
                 default:

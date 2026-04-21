@@ -15,6 +15,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.*;
 
+// updated
 @WebServlet("/admin")
 public class AdminServlet extends HttpServlet {
 
@@ -47,7 +48,7 @@ public class AdminServlet extends HttpServlet {
                     req.setAttribute("pendingMembers", memberDAO.getPending());
                     req.setAttribute("recentTransactions", transactionDAO.getAll());
                     req.setAttribute("severeDefaulters", repaymentDAO.countOverdueDefaulters(90));
-                    req.getRequestDispatcher("/views/admin/dashboard.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/dashboard.jsp").forward(req, res);
                     break;
                 }
 
@@ -59,7 +60,7 @@ public class AdminServlet extends HttpServlet {
 
                     req.setAttribute("members", members != null ? members : Collections.emptyList());
                     req.setAttribute("q", q);
-                    req.getRequestDispatcher("/views/admin/member.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/member.jsp").forward(req, res);
                     break;
                 }
 
@@ -69,7 +70,7 @@ public class AdminServlet extends HttpServlet {
                         int id = Integer.parseInt(idParam);
                         Member member = memberDAO.findById(id);
                         req.setAttribute("member", member);
-                        req.getRequestDispatcher("/views/admin/member_detail.jsp").forward(req, res);
+                        req.getRequestDispatcher("/Views/admin/member_detail.jsp").forward(req, res);
                     } else {
                         res.sendRedirect(ctx + "/admin?page=members");
                     }
@@ -79,7 +80,7 @@ public class AdminServlet extends HttpServlet {
                 case "member-approval": {
                     List<Member> pending = memberDAO.getPending();
                     req.setAttribute("pending", pending != null ? pending : Collections.emptyList());
-                    req.getRequestDispatcher("/views/admin/member_approval.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/member_approval.jsp").forward(req, res);
                     break;
                 }
 
@@ -91,7 +92,7 @@ public class AdminServlet extends HttpServlet {
 
                     req.setAttribute("loans", loans != null ? loans : Collections.emptyList());
                     req.setAttribute("filterStatus", status);
-                    req.getRequestDispatcher("/views/admin/loan.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/loan.jsp").forward(req, res);
                     break;
                 }
 
@@ -101,7 +102,7 @@ public class AdminServlet extends HttpServlet {
                         int id = Integer.parseInt(idParam);
                         Loan loan = loanDAO.findById(id);
                         req.setAttribute("loan", loan);
-                        req.getRequestDispatcher("/views/admin/loan_detail.jsp").forward(req, res);
+                        req.getRequestDispatcher("/Views/admin/loan_detail.jsp").forward(req, res);
                     } else {
                         res.sendRedirect(ctx + "/admin?page=loans");
                     }
@@ -111,7 +112,7 @@ public class AdminServlet extends HttpServlet {
                 case "defaulters": {
                     List<?> defaulters = repaymentDAO.getDefaulters();
                     req.setAttribute("defaulters", defaulters != null ? defaulters : Collections.emptyList());
-                    req.getRequestDispatcher("/views/admin/defaulter.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/defaulter.jsp").forward(req, res);
                     break;
                 }
 
@@ -119,20 +120,20 @@ public class AdminServlet extends HttpServlet {
                     req.setAttribute("monthlySavings", reportDAO.monthlySavings());
                     req.setAttribute("loanRecovery", reportDAO.loanRecovery());
                     req.setAttribute("interestEarned", reportDAO.totalInterestEarned());
-                    req.getRequestDispatcher("/views/admin/reports.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/reports.jsp").forward(req, res);
                     break;
                 }
 
                 case "transactions": {
                     List<?> trans = transactionDAO.getAll();
                     req.setAttribute("transactions", trans != null ? trans : Collections.emptyList());
-                    req.getRequestDispatcher("/views/admin/transaction.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/transaction.jsp").forward(req, res);
                     break;
                 }
 
                 case "staff": {
                     req.setAttribute("staffList", staffDAO.getAll());
-                    req.getRequestDispatcher("/views/admin/staff.jsp").forward(req, res);
+                    req.getRequestDispatcher("/Views/admin/staff.jsp").forward(req, res);
                     break;
                 }
 

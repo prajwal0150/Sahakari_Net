@@ -91,7 +91,7 @@ public class TransactionServlet extends HttpServlet {
                         req.setAttribute("error", "Withdrawal amount must be greater than zero.");
                         req.setAttribute("member", memberDAO.findById(memberId));
                         req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                        req.getRequestDispatcher("/views/staff/withdrawal.jsp").forward(req, res);
+                        req.getRequestDispatcher("/Views/staff/withdrawal.jsp").forward(req, res);
                         return;
                     }
 
@@ -102,7 +102,7 @@ public class TransactionServlet extends HttpServlet {
                         req.setAttribute("error", "Insufficient balance. Current: Rs. " + current);
                         req.setAttribute("member", memberDAO.findById(memberId));
                         req.setAttribute("savings", saDAO.getByMemberId(memberId));
-                        req.getRequestDispatcher("/views/staff/withdrawal.jsp").forward(req, res);
+                        req.getRequestDispatcher("/Views/staff/withdrawal.jsp").forward(req, res);
                         return;
                     }
 

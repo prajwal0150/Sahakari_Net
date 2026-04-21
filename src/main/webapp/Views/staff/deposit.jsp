@@ -11,7 +11,7 @@
 </head><body class="bg-gray-50">
 <jsp:include page="/_nav.jsp"/>
 <div class="lg:ml-64 min-h-screen">
-    <div class="max-w-2xl mx-auto px-6 py-8">
+    <div class="max-w-6xl mx-auto px-6 py-8">
 
         <a href="${pageContext.request.contextPath}/staff?page=search" class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 mb-6">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -24,16 +24,49 @@
         </div>
 
         <c:if test="${member == null}">
-            <!-- Search first -->
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
-                <p class="text-sm font-semibold text-gray-700 mb-3">Find member first</p>
-                <form action="${pageContext.request.contextPath}/staff" method="get" class="flex gap-3">
-                    <input type="hidden" name="page" value="deposit">
-                    <input type="text" name="q" placeholder="Search by name, phone, citizenship..." autofocus
-                           class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
-                    <button type="submit" class="bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-800 transition">Find</button>
-                </form>
-                    <%-- Inline search results would be handled here if needed --%>
+            <c:set var="memberSearchTitle" value="Find member first"/>
+            <c:set var="memberSearchPage" value="deposit"/>
+            <c:set var="memberSearchPlaceholder" value="Search by name, phone, citizenship..."/>
+            <c:set var="memberSearchInputRingClass" value="focus:ring-green-500"/>
+            <c:set var="memberSearchButtonClass" value="bg-green-700 hover:bg-green-800"/>
+            <c:set var="memberSearchSelectButtonClass" value="bg-green-100 text-green-700"/>
+            <c:set var="memberSearchSelectButtonHoverClass" value="hover:bg-green-200"/>
+            <jsp:include page="/Views/staff/_member_search_select.jsp"/>
+
+            <!-- Deposit History Section -->
+            <div class="bg-white rounded-2xl border border-gray-100 p-6 mt-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4">Recent Deposits</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left px-4 py-3 font-semibold text-gray-700">Date</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-700">Member</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-700">Amount</th>
+                                <th class="text-left px-4 py-3 font-semibold text-gray-700">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:choose>
+                                <c:when test="${not empty depositHistory}">
+                                    <c:forEach var="txn" items="${depositHistory}">
+                                        <tr class="border-b border-gray-100 hover:bg-green-50 transition">
+                                            <td class="px-4 py-3 text-gray-600"><fmt:formatDate value="${txn.transactionDate}" pattern="MMM dd, yyyy HH:mm"/></td>
+                                            <td class="px-4 py-3 font-medium text-gray-900">${txn.memberName}</td>
+                                            <td class="px-4 py-3 font-bold text-green-700">+ Rs. <fmt:formatNumber value="${txn.amount}" pattern="#,##0.00"/></td>
+                                            <td class="px-4 py-3 text-gray-600">${txn.description}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">No deposits recorded yet</td>
+                                    </tr>
+                                </c:otherwise>
+                            </c:choose>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </c:if>
 
