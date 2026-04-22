@@ -1,4 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%
+    String error = (String) request.getAttribute("error");
+    String success = request.getParameter("success");
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,6 +134,18 @@ input::placeholder{
             Member registration only. Account activates after admin approval.
         </p>
 
+        <% if (error != null) { %>
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <% if ("true".equals(success)) { %>
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                Registration submitted successfully. Your account is pending admin approval.
+            </div>
+        <% } %>
+
         <form action="register" method="post" class="space-y-5" onsubmit="return validateForm()">
 
             <div>
@@ -141,7 +157,7 @@ input::placeholder{
                     <input type="date" name="dob" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none">
 
                     <select name="gender" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>Select gender</option>
+                        <option value="" selected disabled>Select gender</option>
                         <option>Male</option><option>Female</option><option>Other</option>
                     </select>
 
@@ -161,9 +177,9 @@ input::placeholder{
                 <input type="text" name="username" placeholder="Username *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
 
                 <div class="grid grid-cols-2 gap-4 mt-4">
-                    <input type="password" id="password" placeholder="Password *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="password" id="password" name="password" placeholder="Password *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
 
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
 

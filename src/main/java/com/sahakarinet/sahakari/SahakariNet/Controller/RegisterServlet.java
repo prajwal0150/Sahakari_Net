@@ -49,7 +49,8 @@ public class RegisterServlet extends HttpServlet {
 
         // Validation
         if (ValidationUtil.isNullOrEmpty(normalizedFullName) || ValidationUtil.isNullOrEmpty(normalizedUsername)
-                || ValidationUtil.isNullOrEmpty(password) || ValidationUtil.isNullOrEmpty(normalizedGender)) {
+                || ValidationUtil.isNullOrEmpty(password) || ValidationUtil.isNullOrEmpty(normalizedGender)
+                || ValidationUtil.isNullOrEmpty(normalizedPhone)) {
             req.setAttribute("error", "All fields are required.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
@@ -70,7 +71,7 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
         if (!normalizedPhone.isBlank() && !ValidationUtil.isValidPhone(normalizedPhone)) {
-            req.setAttribute("error", "Invalid phone number. Use 97xxxxxxxx or 98xxxxxxxx.");
+            req.setAttribute("error", "Invalid phone number. It must be exactly 10 digits.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
