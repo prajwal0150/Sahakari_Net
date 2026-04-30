@@ -54,10 +54,6 @@
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/transaction</url-pattern>
     </filter-mapping>
-    <filter-mapping>
-        <filter-name>AuthFilter</filter-name>
-        <url-pattern>/report</url-pattern>
-    </filter-mapping>
 
     <!-- Error pages -->
     <error-page>
