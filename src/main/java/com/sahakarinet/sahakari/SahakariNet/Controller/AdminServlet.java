@@ -116,20 +116,6 @@ public class AdminServlet extends HttpServlet {
                     break;
                 }
 
-                case "reports": {
-                    String period = req.getParameter("period");
-                    if (period == null || period.isBlank()) {
-                        period = "all";
-                    }
-
-                    req.setAttribute("monthlySavings", reportDAO.monthlySavings());
-                    req.setAttribute("loanRecovery", reportDAO.loanRecovery(period));
-                    req.setAttribute("selectedPeriod", period);
-                    req.setAttribute("interestEarned", reportDAO.totalInterestEarned());
-                    req.getRequestDispatcher("/Views/admin/reports.jsp").forward(req, res);
-                    break;
-                }
-
                 case "transactions": {
                     List<?> trans = transactionDAO.getAll();
                     req.setAttribute("transactions", trans != null ? trans : Collections.emptyList());
@@ -352,25 +338,6 @@ public class AdminServlet extends HttpServlet {
                         res.sendRedirect(ctx + "/admin?page=staff&msg=removed");
                     } else {
                         res.sendRedirect(ctx + "/admin?page=staff&error=removeFailed");
-                    }
-                    break;
-                }
-
-                case "credit-savings-interest": {
-                    HttpSession session = req.getSession(false);
-                    Object userIdObj = session != null ? session.getAttribute("userId") : null;
-                    if (!(userIdObj instanceof Number)) {
-                        res.sendRedirect(ctx + "/admin?page=reports&error=invalidRequest");
-                        break;
-                    }
-
-                    int adminId = ((Number) userIdObj).intValue();
-                    int creditedCount = savingAccountDAO.creditMonthlyInterestForAll(adminId);
-
-                    if (creditedCount >= 0) {
-                        res.sendRedirect(ctx + "/admin?page=reports&msg=interestCredited&count=" + creditedCount);
-                    } else {
-                        res.sendRedirect(ctx + "/admin?page=reports&error=interestCreditFailed");
                     }
                     break;
                 }
