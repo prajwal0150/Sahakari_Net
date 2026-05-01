@@ -5,7 +5,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.TransactionDao;
-import com.sahakarinet.sahakari.SahakariNet.utils.session;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,7 +26,7 @@ public class MemberServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            Integer memberIdObj = session.getMemberId(req);
+            Integer memberIdObj = SessionUtil.getMemberId(req);
             if (memberIdObj == null) {
                 res.sendRedirect(req.getContextPath() + "/login.jsp");
                 return;

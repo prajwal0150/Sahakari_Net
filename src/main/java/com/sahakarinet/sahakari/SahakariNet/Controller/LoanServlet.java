@@ -7,6 +7,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.TransactionDao;
 import com.sahakarinet.sahakari.SahakariNet.utils.InterestCalculator;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,19 +28,17 @@ public class LoanServlet extends HttpServlet {
 
         String action = req.getParameter("action");
         String ctx = req.getContextPath();
-        HttpSession session = req.getSession(false);
 
         if (action == null || action.isBlank()) {
             res.sendRedirect(ctx + "/member");
             return;
         }
 
-        if (session == null) {
+        String role = SessionUtil.getRole(req);
+        if (role == null) {
             res.sendRedirect(ctx + "/login.jsp");
             return;
         }
-
-        String role = (String) session.getAttribute("role");
 
         switch (action) {
             // Member applies for a loan
@@ -49,13 +48,13 @@ public class LoanServlet extends HttpServlet {
                     return;
                 }
 
-                Object memberIdObj = session.getAttribute("memberId");
-                if (!(memberIdObj instanceof Number)) {
+                Integer memberIdObj = SessionUtil.getMemberId(req);
+                if (memberIdObj == null) {
                     res.sendRedirect(ctx + "/login.jsp");
                     return;
                 }
 
-                int memberId = ((Number) memberIdObj).intValue();
+                int memberId = memberIdObj;
                 double amount;
                 int months;
                 try {
@@ -111,13 +110,13 @@ public class LoanServlet extends HttpServlet {
                     return;
                 }
 
-                Object staffIdObj = session.getAttribute("userId");
-                if (!(staffIdObj instanceof Number)) {
+                Integer staffIdObj = SessionUtil.getUserId(req);
+                if (staffIdObj == null) {
                     res.sendRedirect(ctx + "/login.jsp");
                     return;
                 }
 
-                int staffId = ((Number) staffIdObj).intValue();
+                int staffId = staffIdObj;
                 Loan loan = loanDAO.findById(loanId);
 
                 if (loan != null && "APPROVED".equals(loan.getStatus())) {

@@ -10,6 +10,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.TransactionDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
 import com.sahakarinet.sahakari.SahakariNet.utils.ValidationUtil;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -69,11 +70,10 @@ public class StaffServlet extends HttpServlet {
 
             switch (page) {
                 case "dashboard": {
-                    HttpSession session = req.getSession(false);
-                    Object userIdObj = session != null ? session.getAttribute("userId") : null;
+                    Integer userIdObj = SessionUtil.getUserId(req);
                     int uid = 0;
-                    if (userIdObj instanceof Number) {
-                        uid = ((Number) userIdObj).intValue();
+                    if (userIdObj != null) {
+                        uid = userIdObj;
                     }
                     req.setAttribute("todayCount", txDAO.countTodayByStaff(uid));
                     req.setAttribute("totalMembers", memberDAO.countByStatus("APPROVED"));
@@ -272,11 +272,10 @@ public class StaffServlet extends HttpServlet {
                     break;
                 }
                 case "profile": {
-                    HttpSession session = req.getSession(false);
-                    Object userIdObj = session != null ? session.getAttribute("userId") : null;
+                    Integer userIdObj = SessionUtil.getUserId(req);
                     int uid = 0;
-                    if (userIdObj instanceof Number) {
-                        uid = ((Number) userIdObj).intValue();
+                    if (userIdObj != null) {
+                        uid = userIdObj;
                     }
                     req.setAttribute("staff", staffDAO.findByUserId(uid));
                     req.getRequestDispatcher("/Views/staff/profile.jsp").forward(req, res);
@@ -326,13 +325,13 @@ public class StaffServlet extends HttpServlet {
                     break;
                 }
 
-                Object userIdObj = req.getSession(false) != null ? req.getSession(false).getAttribute("userId") : null;
-                if (!(userIdObj instanceof Number)) {
+                Integer userIdObj = SessionUtil.getUserId(req);
+                if (userIdObj == null) {
                     res.sendRedirect(ctx + "/login.jsp");
                     break;
                 }
 
-                int userId = ((Number) userIdObj).intValue();
+                int userId = userIdObj;
                 User user = userDAO.findById(userId);
                 if (user == null || !userDAO.verifyAndUpgradePassword(user, currentPassword.trim())) {
                     res.sendRedirect(ctx + "/staff?page=profile&error=currentPasswordInvalid");

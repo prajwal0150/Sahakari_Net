@@ -1,6 +1,6 @@
 package com.sahakarinet.sahakari.SahakariNet.Controller;
 
-import com.sahakarinet.sahakari.SahakariNet.utils.session;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.IOException;
 public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        session.clearSession(req);
+        SessionUtil.clearSession(req);
         res.sendRedirect(req.getContextPath() + "/login.jsp?logout=true");
     }
 }

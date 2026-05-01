@@ -4,7 +4,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.User;
 import com.sahakarinet.sahakari.SahakariNet.model.Member;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
-import com.sahakarinet.sahakari.SahakariNet.utils.session;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -20,7 +20,7 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         // Already logged in? redirect to dashboard
-        String role = session.getRole(req);
+        String role = SessionUtil.getRole(req);
         if (role != null) {
             redirectByRole(role, req, res);
             return;
@@ -73,13 +73,13 @@ public class LoginServlet extends HttpServlet {
         }
 
         // Create session
-        session.setUserSession(req, user.getId(), user.getUsername(), user.getRole());
+        SessionUtil.setUserSession(req, user.getId(), user.getUsername(), user.getRole());
 
         // If member, also store memberId
         if ("MEMBER".equals(user.getRole())) {
             Member member = memberDAO.findByUserId(user.getId());
             if (member != null) {
-                session.setMemberSession(req, member.getId(), member.getFullName());
+                SessionUtil.setMemberSession(req, member.getId(), member.getFullName());
             }
         }
 

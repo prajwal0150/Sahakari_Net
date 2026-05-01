@@ -2,13 +2,13 @@ package com.sahakarinet.sahakari.SahakariNet.Controller;
 
 import com.sahakarinet.sahakari.SahakariNet.model.dao.ReportDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -40,15 +40,14 @@ public class ReportServlet extends HttpServlet {
 			return;
 		}
 
-		HttpSession session = request.getSession(false);
-		Object userIdObj = session != null ? session.getAttribute("userId") : null;
-		if (!(userIdObj instanceof Number)) {
+		Integer userIdObj = SessionUtil.getUserId(request);
+		if (userIdObj == null) {
 			response.sendRedirect(request.getContextPath() + "/report?error=invalidRequest");
 			return;
 		}
 
 		try {
-			int adminId = ((Number) userIdObj).intValue();
+			int adminId = userIdObj;
 			int creditedCount = savingAccountDao.creditMonthlyInterestForAll(adminId);
 
 			if (creditedCount >= 0) {

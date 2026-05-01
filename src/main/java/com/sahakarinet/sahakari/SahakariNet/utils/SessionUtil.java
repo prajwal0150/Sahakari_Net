@@ -3,16 +3,16 @@ package com.sahakarinet.sahakari.SahakariNet.utils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-public class session {
+public class SessionUtil {
 
-    private session() {
+    private SessionUtil() {
     }
 
-    public static HttpSession getSession(HttpServletRequest request, boolean create) {
+    private static HttpSession getSession(HttpServletRequest request, boolean create) {
         return request != null ? request.getSession(create) : null;
     }
 
-    public static HttpSession getSession(HttpServletRequest request) {
+    private static HttpSession getSession(HttpServletRequest request) {
         return getSession(request, false);
     }
 
@@ -37,16 +37,8 @@ public class session {
         return getIntegerAttribute(request, "memberId");
     }
 
-    public static String getUsername(HttpServletRequest request) {
-        return getStringAttribute(request, "username");
-    }
-
     public static String getRole(HttpServletRequest request) {
         return getStringAttribute(request, "role");
-    }
-
-    public static boolean isLoggedIn(HttpServletRequest request) {
-        return getRole(request) != null;
     }
 
     public static void clearSession(HttpServletRequest request) {

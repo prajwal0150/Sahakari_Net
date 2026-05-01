@@ -6,6 +6,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.TransactionDao;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,13 +29,12 @@ public class TransactionServlet extends HttpServlet {
         try {
             String action = req.getParameter("action");
             String ctx = req.getContextPath();
-            HttpSession session = req.getSession(false);
-            Object staffIdObj = session != null ? session.getAttribute("userId") : null;
-            if (!(staffIdObj instanceof Number)) {
+            Integer staffIdObj = SessionUtil.getUserId(req);
+            if (staffIdObj == null) {
                 res.sendRedirect(ctx + "/login.jsp");
                 return;
             }
-            int staffId = ((Number) staffIdObj).intValue();
+            int staffId = staffIdObj;
 
             if (action == null || action.isBlank()) {
                 res.sendRedirect(ctx + "/staff");

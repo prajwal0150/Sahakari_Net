@@ -1,6 +1,6 @@
 package com.sahakarinet.sahakari.SahakariNet.Auth;
 
-import com.sahakarinet.sahakari.SahakariNet.utils.session;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        String role = session.getRole(request);
+        String role = SessionUtil.getRole(request);
 
         // ❌ Not logged in → redirect
         if (role == null) {

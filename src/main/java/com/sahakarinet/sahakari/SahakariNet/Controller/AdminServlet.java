@@ -7,6 +7,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.User;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.*;
 import com.sahakarinet.sahakari.SahakariNet.utils.PasswordUtil;
 import com.sahakarinet.sahakari.SahakariNet.utils.ValidationUtil;
+import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -186,20 +187,12 @@ public class AdminServlet extends HttpServlet {
 
                 case "approve-loan": {
                     String loanIdParam = req.getParameter("loanId");
-
-                    HttpSession session = req.getSession(false);
-
-                    if (loanIdParam != null && session != null) {
+                    Integer userIdObj = SessionUtil.getUserId(req);
+                    if (loanIdParam != null && userIdObj != null) {
                         int loanId = Integer.parseInt(loanIdParam);
-                        Object userIdObj = session.getAttribute("userId");
-
-                        if (userIdObj instanceof Number) {
-                            int adminId = ((Number) userIdObj).intValue();
-                            loanDAO.approve(loanId, adminId);
-                            res.sendRedirect(ctx + "/admin?page=loan-detail&id=" + loanId);
-                        } else {
-                            res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
-                        }
+                        int adminId = userIdObj;
+                        loanDAO.approve(loanId, adminId);
+                        res.sendRedirect(ctx + "/admin?page=loan-detail&id=" + loanId);
                     } else {
                         res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
                     }
@@ -208,20 +201,12 @@ public class AdminServlet extends HttpServlet {
 
                 case "reject-loan": {
                     String loanIdParam = req.getParameter("loanId");
-
-                    HttpSession session = req.getSession(false);
-
-                    if (loanIdParam != null && session != null) {
+                    Integer userIdObj = SessionUtil.getUserId(req);
+                    if (loanIdParam != null && userIdObj != null) {
                         int loanId = Integer.parseInt(loanIdParam);
-                        Object userIdObj = session.getAttribute("userId");
-
-                        if (userIdObj instanceof Number) {
-                            int adminId = ((Number) userIdObj).intValue();
-                            loanDAO.reject(loanId, adminId);
-                            res.sendRedirect(ctx + "/admin?page=loans&msg=rejected");
-                        } else {
-                            res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
-                        }
+                        int adminId = userIdObj;
+                        loanDAO.reject(loanId, adminId);
+                        res.sendRedirect(ctx + "/admin?page=loans&msg=rejected");
                     } else {
                         res.sendRedirect(ctx + "/admin?page=loans&error=invalidRequest");
                     }
