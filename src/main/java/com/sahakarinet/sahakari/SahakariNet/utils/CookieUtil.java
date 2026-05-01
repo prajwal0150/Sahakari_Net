@@ -4,13 +4,16 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class Cookies {
+public class CookieUtil {
 
-    private Cookies() {
+    private CookieUtil() {
     }
 
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-        Cookie cookie = new Cookie(name, value);
+        if (response == null || name == null) {
+            return;
+        }
+        Cookie cookie = new Cookie(name, value == null ? "" : value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAgeSeconds);
@@ -18,10 +21,14 @@ public class Cookies {
     }
 
     public static Cookie getCookie(HttpServletRequest request, String name) {
-        if (request == null || request.getCookies() == null) {
+        if (request == null || name == null) {
             return null;
         }
-        for (Cookie cookie : request.getCookies()) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
             if (cookie != null && name.equals(cookie.getName())) {
                 return cookie;
             }
@@ -35,10 +42,13 @@ public class Cookies {
     }
 
     public static void deleteCookie(HttpServletResponse response, String name) {
+        if (response == null || name == null) {
+            return;
+        }
         Cookie cookie = new Cookie(name, "");
         cookie.setPath("/");
-        cookie.setMaxAge(0);
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
 }
