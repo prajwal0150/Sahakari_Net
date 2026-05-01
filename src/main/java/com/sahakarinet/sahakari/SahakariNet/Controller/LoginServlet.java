@@ -4,6 +4,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.User;
 import com.sahakarinet.sahakari.SahakariNet.model.Member;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
+import com.sahakarinet.sahakari.SahakariNet.utils.session;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -19,9 +20,9 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
         // Already logged in? redirect to dashboard
-        HttpSession session = req.getSession(false);
-        if (session != null && session.getAttribute("role") != null) {
-            redirectByRole((String) session.getAttribute("role"), req, res);
+        String role = session.getRole(req);
+        if (role != null) {
+            redirectByRole(role, req, res);
             return;
         }
         req.getRequestDispatcher("login.jsp").forward(req, res);
@@ -72,17 +73,13 @@ public class LoginServlet extends HttpServlet {
         }
 
         // Create session
-        HttpSession session = req.getSession(true);
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("username", user.getUsername());
-        session.setAttribute("role", user.getRole());
+        session.setUserSession(req, user.getId(), user.getUsername(), user.getRole());
 
         // If member, also store memberId
         if ("MEMBER".equals(user.getRole())) {
             Member member = memberDAO.findByUserId(user.getId());
             if (member != null) {
-                session.setAttribute("memberId", member.getId());
-                session.setAttribute("memberName", member.getFullName());
+                session.setMemberSession(req, member.getId(), member.getFullName());
             }
         }
 
