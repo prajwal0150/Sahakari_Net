@@ -138,6 +138,45 @@ public class MemberDao {
         return false;
     }
 
+    public boolean fullNameExists(String fullName) {
+        String sql = "SELECT COUNT(*) FROM members WHERE LOWER(full_name) = LOWER(?)";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, fullName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean phoneExists(String phone) {
+        String sql = "SELECT COUNT(*) FROM members WHERE phone = ?";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, phone);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean addressExists(String address) {
+        String sql = "SELECT COUNT(*) FROM members WHERE LOWER(address) = LOWER(?)";
+        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+            ps.setString(1, address);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public int countByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM members WHERE status = ?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
