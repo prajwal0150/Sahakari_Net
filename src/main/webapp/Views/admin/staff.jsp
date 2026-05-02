@@ -36,8 +36,15 @@
           <c:when test="${param.error == 'missingFields'}">All fields are required.</c:when>
           <c:when test="${param.error == 'invalidEmail'}">Please enter a valid email address.</c:when>
           <c:when test="${param.error == 'invalidPhone'}">Phone must be in 97xxxxxxxx or 98xxxxxxxx format.</c:when>
+          <c:when test="${param.error == 'invalidCitizenship'}">Please enter a valid citizenship number.</c:when>
+          <c:when test="${param.error == 'invalidFullName'}">Full name must contain letters only.</c:when>
+          <c:when test="${param.error == 'invalidAddress'}">Please enter a valid address.</c:when>
           <c:when test="${param.error == 'usernameExists'}">Username already exists.</c:when>
           <c:when test="${param.error == 'emailExists'}">Email already exists.</c:when>
+          <c:when test="${param.error == 'citizenshipExists'}">Citizenship number already exists.</c:when>
+          <c:when test="${param.error == 'fullNameExists'}">Full name already exists.</c:when>
+          <c:when test="${param.error == 'phoneExists'}">Phone number already exists.</c:when>
+          <c:when test="${param.error == 'addressExists'}">Address already exists.</c:when>
           <c:when test="${param.error == 'invalidStaff'}">Invalid staff account selected.</c:when>
           <c:when test="${param.error == 'invalidPassword'}">Password must be at least 6 characters.</c:when>
           <c:when test="${param.error == 'removeFailed'}">Could not remove the staff account. Please try again.</c:when>
@@ -56,7 +63,7 @@
 
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Full Name</label>
-              <input type="text" name="fullName" required
+              <input type="text" name="fullName" required pattern="[A-Za-z]+( [A-Za-z]+)*" title="Use letters and spaces only"
                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <div>
@@ -81,17 +88,22 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Phone Number</label>
-              <input type="text" name="phone" placeholder="98........." maxlength="10"
+              <input type="text" name="phone" placeholder="98........." maxlength="10" required pattern="(97|98)[0-9]{8}" title="Phone must start with 97 or 98 and contain 10 digits"
+                   class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Citizenship Number</label>
+              <input type="text" name="citizenshipNo" required pattern="[0-9\-/]{5,30}" title="Use 5-30 characters: digits, dash, or slash"
                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Permanent Address</label>
-              <input type="text" name="permanentAddress" required
+              <input type="text" name="permanentAddress" required minlength="5" maxlength="255" pattern="[A-Za-z0-9][A-Za-z0-9\s,./#-]{4,254}" title="Use at least 5 characters; letters, numbers, spaces, comma, dot, slash, # or -"
                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Temporary Address</label>
-              <input type="text" name="temporaryAddress" required
+              <input type="text" name="temporaryAddress" required minlength="5" maxlength="255" pattern="[A-Za-z0-9][A-Za-z0-9\s,./#-]{4,254}" title="Use at least 5 characters; letters, numbers, spaces, comma, dot, slash, # or -"
                    class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50">
             </div>
             <button type="submit" class="w-full bg-green-700 text-white text-sm font-semibold rounded-xl py-2.5 hover:bg-green-800 transition">Create Staff</button>

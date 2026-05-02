@@ -152,7 +152,7 @@ input::placeholder{
                 <h3 class="section-title mb-4">Personal Information</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="fullName" placeholder="Full Name *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" name="fullName" placeholder="Full Name *" required pattern="[A-Za-z]+( [A-Za-z]+)*" title="Use letters and spaces only" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
 
                     <input type="date" name="dob" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none">
 
@@ -161,20 +161,20 @@ input::placeholder{
                         <option>Male</option><option>Female</option><option>Other</option>
                     </select>
 
-                    <input type="tel" name="phone" placeholder="Phone Number *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="tel" name="phone" placeholder="Phone Number *" required maxlength="10" pattern="(97|98)[0-9]{8}" title="Phone must start with 97 or 98 and contain 10 digits" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
 
-                <input type="text" name="citizenshipNo" placeholder="Citizenship No. *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="text" name="citizenshipNo" placeholder="Citizenship No. *" required pattern="[0-9\-/]{5,30}" title="Use 5-30 characters: digits, dash, or slash" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
 
-                <input type="text" name="address" placeholder="Address *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="text" name="address" placeholder="Address *" required minlength="5" maxlength="255" pattern="[A-Za-z0-9][A-Za-z0-9\s,./#-]{4,254}" title="Use at least 5 characters; letters, numbers, spaces, comma, dot, slash, # or -" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
             <div>
                 <h3 class="section-title mb-4 mt-6">Login Credentials</h3>
 
-                <input type="email" name="email" placeholder="Email" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="email" name="email" placeholder="Email *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">
 
-                <input type="text" name="username" placeholder="Username *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="text" name="username" placeholder="Username *" required pattern="[A-Za-z0-9_]{4,20}" title="Use 4-20 letters, numbers, or underscore" class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 mt-4 focus:ring-2 focus:ring-blue-500 outline-none">
 
                 <div class="grid grid-cols-2 gap-4 mt-4">
                     <input type="password" id="password" name="password" placeholder="Password *" required class="input-text w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none">

@@ -218,6 +218,7 @@ public class AdminServlet extends HttpServlet {
                     String gender = req.getParameter("gender");
                     String email = req.getParameter("email");
                     String phone = req.getParameter("phone");
+                    String citizenshipNo = req.getParameter("citizenshipNo");
                     String password = req.getParameter("password");
                     String permanentAddress = req.getParameter("permanentAddress");
                     String temporaryAddress = req.getParameter("temporaryAddress");
@@ -225,6 +226,7 @@ public class AdminServlet extends HttpServlet {
                     if (fullName == null || fullName.isBlank() || email == null || email.isBlank()
                             || gender == null || gender.isBlank()
                             || phone == null || phone.isBlank()
+                            || citizenshipNo == null || citizenshipNo.isBlank()
                             || password == null || password.isBlank()
                             || permanentAddress == null || permanentAddress.isBlank()
                             || temporaryAddress == null || temporaryAddress.isBlank()) {
@@ -232,21 +234,44 @@ public class AdminServlet extends HttpServlet {
                         break;
                     }
 
-                    if (!ValidationUtil.isValidPassword(password.trim())) {
-                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidPassword");
+                    String normalizedFullName = fullName.trim();
+                    String normalizedGender = gender.trim();
+                    String normalizedEmail = email.trim().toLowerCase();
+                    String normalizedPhone = phone.trim();
+                    String normalizedCitizenship = citizenshipNo.trim();
+                    String normalizedPassword = password.trim();
+                    String normalizedPermanentAddress = permanentAddress.trim();
+                    String normalizedTemporaryAddress = temporaryAddress.trim();
+                    String normalizedUsername = normalizedEmail;
+
+                    if (!ValidationUtil.isValidFullName(normalizedFullName)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidFullName");
                         break;
                     }
 
-                    String normalizedEmail = email.trim().toLowerCase();
-                    String normalizedPhone = phone.trim();
-                    String normalizedUsername = normalizedEmail;
+                    if (!ValidationUtil.isValidPassword(normalizedPassword)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidPassword");
+                        break;
+                    }
 
                     if (!ValidationUtil.isValidEmail(normalizedEmail)) {
                         res.sendRedirect(ctx + "/admin?page=staff&error=invalidEmail");
                         break;
                     }
+
                     if (!ValidationUtil.isValidPhone(normalizedPhone)) {
                         res.sendRedirect(ctx + "/admin?page=staff&error=invalidPhone");
+                        break;
+                    }
+
+                    if (!ValidationUtil.isValidCitizenshipNo(normalizedCitizenship)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidCitizenship");
+                        break;
+                    }
+
+                    if (!ValidationUtil.isValidAddress(normalizedPermanentAddress)
+                            || !ValidationUtil.isValidAddress(normalizedTemporaryAddress)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidAddress");
                         break;
                     }
 
@@ -259,15 +284,40 @@ public class AdminServlet extends HttpServlet {
                         break;
                     }
 
+                    if (memberDAO.fullNameExists(normalizedFullName) || staffDAO.fullNameExists(normalizedFullName)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=fullNameExists");
+                        break;
+                    }
+
+                    if (memberDAO.phoneExists(normalizedPhone) || staffDAO.phoneExists(normalizedPhone)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=phoneExists");
+                        break;
+                    }
+
+                    if (memberDAO.addressExists(normalizedPermanentAddress)
+                            || memberDAO.addressExists(normalizedTemporaryAddress)
+                            || staffDAO.addressExists(normalizedPermanentAddress)
+                            || staffDAO.addressExists(normalizedTemporaryAddress)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=addressExists");
+                        break;
+                    }
+
+                    if (memberDAO.citizenshipExists(normalizedCitizenship)
+                            || staffDAO.citizenshipExists(normalizedCitizenship)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=citizenshipExists");
+                        break;
+                    }
+
                     Staff staff = new Staff();
-                    staff.setFullName(fullName.trim());
-                    staff.setGender(gender.trim());
+                    staff.setFullName(normalizedFullName);
+                    staff.setGender(normalizedGender);
                     staff.setUsername(normalizedUsername);
                     staff.setEmail(normalizedEmail);
-                    staff.setPasswordHash(PasswordUtil.hash(password.trim()));
+                    staff.setPasswordHash(PasswordUtil.hash(normalizedPassword));
                     staff.setPhone(normalizedPhone);
-                    staff.setPermanentAddress(permanentAddress.trim());
-                    staff.setTemporaryAddress(temporaryAddress.trim());
+                    staff.setCitizenshipNo(normalizedCitizenship);
+                    staff.setPermanentAddress(normalizedPermanentAddress);
+                    staff.setTemporaryAddress(normalizedTemporaryAddress);
                     staff.setActive(true);
 
                     int staffUserId = staffDAO.registerStaff(staff);

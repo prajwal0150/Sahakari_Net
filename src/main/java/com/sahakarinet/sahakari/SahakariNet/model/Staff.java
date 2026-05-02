@@ -7,6 +7,7 @@ public class Staff {
     private String fullName;
     private String gender;
     private String phone;
+    private String citizenshipNo;
     private String permanentAddress;
     private String temporaryAddress;
     private String username;
@@ -49,6 +50,14 @@ public class Staff {
 
     public String getPermanentAddress() {
         return permanentAddress;
+    }
+
+    public String getCitizenshipNo() {
+        return citizenshipNo;
+    }
+
+    public void setCitizenshipNo(String citizenshipNo) {
+        this.citizenshipNo = citizenshipNo;
     }
 
     public void setPermanentAddress(String permanentAddress) {

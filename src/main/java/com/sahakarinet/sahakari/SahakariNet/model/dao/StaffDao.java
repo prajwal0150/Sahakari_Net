@@ -22,6 +22,7 @@ public class StaffDao {
                 + "full_name VARCHAR(120) NOT NULL, "
                 + "gender VARCHAR(20) NOT NULL, "
                 + "phone VARCHAR(20) NOT NULL, "
+                + "citizenship_no VARCHAR(50), "
                 + "permanent_address VARCHAR(255) NOT NULL, "
                 + "temporary_address VARCHAR(255) NOT NULL, "
                 + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
@@ -29,12 +30,17 @@ public class StaffDao {
                 + ")";
         try (Statement st = c.createStatement()) {
             st.execute(ddl);
+            try {
+                st.execute("ALTER TABLE staff_profiles ADD COLUMN citizenship_no VARCHAR(50)");
+            } catch (SQLException ignored) {
+                // Column already exists or DB does not support this alter syntax.
+            }
         }
     }
 
     public int registerStaff(Staff staff) {
         String sql = "INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?,?,?,?,?)";
-        String profileSql = "INSERT INTO staff_profiles (user_id, full_name, gender, phone, permanent_address, temporary_address) VALUES (?,?,?,?,?,?)";
+        String profileSql = "INSERT INTO staff_profiles (user_id, full_name, gender, phone, citizenship_no, permanent_address, temporary_address) VALUES (?,?,?,?,?,?,?)";
 
         try (Connection c = conn()) {
             ensureStaffProfileTable(c);
@@ -66,8 +72,9 @@ public class StaffDao {
                 profilePs.setString(2, staff.getFullName());
                 profilePs.setString(3, staff.getGender());
                 profilePs.setString(4, staff.getPhone());
-                profilePs.setString(5, staff.getPermanentAddress());
-                profilePs.setString(6, staff.getTemporaryAddress());
+                profilePs.setString(5, staff.getCitizenshipNo());
+                profilePs.setString(6, staff.getPermanentAddress());
+                profilePs.setString(7, staff.getTemporaryAddress());
                 profilePs.executeUpdate();
             }
 
@@ -81,7 +88,7 @@ public class StaffDao {
 
     public Staff findByUserId(int userId) {
         String sql = "SELECT u.id, u.username, u.email, u.password_hash, u.is_active, u.created_at, "
-                + "sp.full_name, sp.gender, sp.phone, sp.permanent_address, sp.temporary_address "
+                + "sp.full_name, sp.gender, sp.phone, sp.citizenship_no, sp.permanent_address, sp.temporary_address "
                 + "FROM users u LEFT JOIN staff_profiles sp ON sp.user_id = u.id "
                 + "WHERE u.id = ? AND u.role = 'STAFF'";
         try (Connection c = conn()) {
@@ -103,7 +110,7 @@ public class StaffDao {
     public List<Staff> getAll() {
         List<Staff> staffList = new ArrayList<>();
         String sql = "SELECT u.id, u.username, u.email, u.password_hash, u.is_active, u.created_at, "
-                + "sp.full_name, sp.gender, sp.phone, sp.permanent_address, sp.temporary_address "
+                + "sp.full_name, sp.gender, sp.phone, sp.citizenship_no, sp.permanent_address, sp.temporary_address "
                 + "FROM users u LEFT JOIN staff_profiles sp ON sp.user_id = u.id "
                 + "WHERE u.role = 'STAFF' ORDER BY u.id DESC";
         try (Connection c = conn()) {
@@ -174,6 +181,24 @@ public class StaffDao {
         return false;
     }
 
+    public boolean citizenshipExists(String citizenshipNo) {
+        String sql = "SELECT COUNT(*) FROM staff_profiles WHERE citizenship_no = ?";
+        try (Connection c = conn()) {
+            ensureStaffProfileTable(c);
+            try (PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setString(1, citizenshipNo);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Staff mapStaff(ResultSet rs) throws SQLException {
         Staff staff = new Staff();
         staff.setUserId(rs.getInt("id"));
@@ -185,6 +210,7 @@ public class StaffDao {
         staff.setFullName(rs.getString("full_name"));
         staff.setGender(rs.getString("gender"));
         staff.setPhone(rs.getString("phone"));
+        staff.setCitizenshipNo(rs.getString("citizenship_no"));
         staff.setPermanentAddress(rs.getString("permanent_address"));
         staff.setTemporaryAddress(rs.getString("temporary_address"));
         return staff;

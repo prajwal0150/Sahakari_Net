@@ -3,6 +3,7 @@ package com.sahakarinet.sahakari.SahakariNet.Controller;
 import com.sahakarinet.sahakari.SahakariNet.model.Member;
 import com.sahakarinet.sahakari.SahakariNet.model.User;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
+import com.sahakarinet.sahakari.SahakariNet.model.dao.StaffDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
 import com.sahakarinet.sahakari.SahakariNet.utils.PasswordUtil;
 import com.sahakarinet.sahakari.SahakariNet.utils.ValidationUtil;
@@ -17,6 +18,7 @@ public class RegisterServlet extends HttpServlet {
 
     private UserDao userDAO = new UserDao();
     private MemberDao memberDAO = new MemberDao();
+    private StaffDao staffDAO = new StaffDao();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -44,17 +46,33 @@ public class RegisterServlet extends HttpServlet {
         String normalizedPhone = phone != null ? phone.trim() : "";
         String normalizedAddress = address != null ? address.trim() : "";
         String normalizedCitizenship = citizenshipNo != null ? citizenshipNo.trim() : "";
-        String normalizedEmail = email != null ? email.trim() : "";
-        String normalizedUsername = username != null ? username.trim() : "";
+        String normalizedEmail = email != null ? email.trim().toLowerCase() : "";
+        String normalizedUsername = username != null ? username.trim().toLowerCase() : "";
 
         // Validation
         if (ValidationUtil.isNullOrEmpty(normalizedFullName) || ValidationUtil.isNullOrEmpty(normalizedUsername)
                 || ValidationUtil.isNullOrEmpty(password) || ValidationUtil.isNullOrEmpty(normalizedGender)
-                || ValidationUtil.isNullOrEmpty(normalizedPhone)) {
+                || ValidationUtil.isNullOrEmpty(normalizedPhone)
+                || ValidationUtil.isNullOrEmpty(normalizedAddress)
+                || ValidationUtil.isNullOrEmpty(normalizedEmail)
+                || ValidationUtil.isNullOrEmpty(normalizedCitizenship)) {
             req.setAttribute("error", "All fields are required.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
+
+        if (!ValidationUtil.isValidFullName(normalizedFullName)) {
+            req.setAttribute("error", "Full name must contain letters only.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
+        if (!ValidationUtil.isValidUsername(normalizedUsername)) {
+            req.setAttribute("error", "Invalid username. Use 4-20 letters, numbers, or underscore only.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
         if (confirmPw == null || !password.equals(confirmPw)) {
             req.setAttribute("error", "Passwords do not match.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
@@ -65,32 +83,62 @@ public class RegisterServlet extends HttpServlet {
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (!normalizedEmail.isBlank() && !ValidationUtil.isValidEmail(normalizedEmail)) {
+
+        if (!ValidationUtil.isValidEmail(normalizedEmail)) {
             req.setAttribute("error", "Invalid email format.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (!normalizedPhone.isBlank() && !ValidationUtil.isValidPhone(normalizedPhone)) {
+
+        if (!ValidationUtil.isValidPhone(normalizedPhone)) {
             req.setAttribute("error", "Invalid phone number. It must be exactly 10 digits.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
+
+        if (!ValidationUtil.isValidAddress(normalizedAddress)) {
+            req.setAttribute("error", "Invalid address format.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
+        if (!ValidationUtil.isValidCitizenshipNo(normalizedCitizenship)) {
+            req.setAttribute("error", "Invalid citizenship number format.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
         if (userDAO.usernameExists(normalizedUsername)) {
             req.setAttribute("error", "Username '" + username + "' is already taken.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (!normalizedEmail.isBlank() && userDAO.emailExists(normalizedEmail)) {
+
+        if (userDAO.emailExists(normalizedEmail)) {
             req.setAttribute("error", "Email is already registered.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (normalizedCitizenship.isBlank()) {
-            req.setAttribute("error", "Citizenship number is required for member registration.");
+
+        if (memberDAO.fullNameExists(normalizedFullName) || staffDAO.fullNameExists(normalizedFullName)) {
+            req.setAttribute("error", "Full name is already registered.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
         }
-        if (memberDAO.citizenshipExists(normalizedCitizenship)) {
+
+        if (memberDAO.phoneExists(normalizedPhone) || staffDAO.phoneExists(normalizedPhone)) {
+            req.setAttribute("error", "Phone number is already registered.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
+        if (memberDAO.addressExists(normalizedAddress) || staffDAO.addressExists(normalizedAddress)) {
+            req.setAttribute("error", "Address is already registered.");
+            req.getRequestDispatcher("register.jsp").forward(req, res);
+            return;
+        }
+
+        if (memberDAO.citizenshipExists(normalizedCitizenship) || staffDAO.citizenshipExists(normalizedCitizenship)) {
             req.setAttribute("error", "Citizenship number is already registered.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
             return;
