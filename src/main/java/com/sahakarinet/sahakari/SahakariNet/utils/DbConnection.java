@@ -24,4 +24,19 @@ public class DbConnection {
         return conec;
     }
 
+    // Test database connection status
+    public static boolean testConnection() {
+        try (Connection conn = getConnection()) {
+            if (conn != null) {
+                System.out.println("Database connection successful!");
+                System.out.println("Connected to: " + conn.getMetaData().getURL());
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Database connection failed!");
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
