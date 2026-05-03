@@ -12,8 +12,7 @@ public class CookieUtil {
     public static final String COOKIE_MEMBER_ID = "memberId";
     public static final String COOKIE_MEMBER_NAME = "memberName";
 
-    private CookieUtil() {
-    }
+
 
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
         if (response == null || name == null) {
@@ -42,10 +41,10 @@ public class CookieUtil {
         return null;
     }
 
-    public static String getCookieValue(HttpServletRequest request, String name) {
-        Cookie cookie = getCookie(request, name);
-        return cookie != null ? cookie.getValue() : null;
-    }
+//    public static String getCookieValue(HttpServletRequest request, String name) {
+//        Cookie cookie = getCookie(request, name);
+//        return cookie != null ? cookie.getValue() : null;
+//    }
 
     public static void deleteCookie(HttpServletResponse response, String name) {
         if (response == null || name == null) {
