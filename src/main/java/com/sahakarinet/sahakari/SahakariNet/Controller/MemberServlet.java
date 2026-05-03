@@ -1,5 +1,6 @@
 package com.sahakarinet.sahakari.SahakariNet.Controller;
 
+import com.sahakarinet.sahakari.SahakariNet.model.Loan;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
@@ -79,7 +80,7 @@ public class MemberServlet extends HttpServlet {
                         break;
                     }
 
-                    var loan = loanDAO.findById(loanId);
+                    Loan loan = loanDAO.findById(loanId);
                     if (loan == null || loan.getMemberId() != memberId) {
                         res.sendRedirect(req.getContextPath() + "/member?page=my-loans");
                         return;

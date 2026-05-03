@@ -13,21 +13,6 @@ public class UserDao {
         return DbConnection.getConnection();
     }
 
-    private void ensureStaffProfilesTable(Connection c) throws SQLException {
-        String ddl = "CREATE TABLE IF NOT EXISTS staff_profiles ("
-                + "user_id INT PRIMARY KEY, "
-                + "full_name VARCHAR(120) NOT NULL, "
-                + "phone VARCHAR(20) NOT NULL, "
-                + "permanent_address VARCHAR(255) NOT NULL, "
-                + "temporary_address VARCHAR(255) NOT NULL, "
-                + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                + "CONSTRAINT fk_staff_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
-                + ")";
-        try (Statement st = c.createStatement()) {
-            st.execute(ddl);
-        }
-    }
-
     public User findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
@@ -195,39 +180,6 @@ public class UserDao {
             return true;
         }
         return false;
-    }
-
-    public User findByEmailOrPhone(String identifier) {
-        String sql = "SELECT DISTINCT u.* FROM users u "
-                + "LEFT JOIN members m ON m.user_id = u.id "
-                + "LEFT JOIN staff_profiles sp ON sp.user_id = u.id "
-                + "WHERE u.email = ? OR m.phone = ? OR sp.phone = ? "
-                + "ORDER BY u.id DESC LIMIT 1";
-
-        try (Connection c = conn()) {
-            ensureStaffProfilesTable(c);
-            try (PreparedStatement ps = c.prepareStatement(sql)) {
-                ps.setString(1, identifier);
-                ps.setString(2, identifier);
-                ps.setString(3, identifier);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return mapUser(rs);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public boolean resetPasswordByIdentifier(String identifier, String plainPassword) {
-        User user = findByEmailOrPhone(identifier);
-        if (user == null) {
-            return false;
-        }
-        return updatePasswordHash(user.getId(), PasswordUtil.hash(plainPassword));
     }
 
     public boolean updatePasswordForUser(int userId, String plainPassword) {

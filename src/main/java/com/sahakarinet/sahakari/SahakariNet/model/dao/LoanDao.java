@@ -161,17 +161,6 @@ public class LoanDao {
         return 0;
     }
 
-    public double getTotalDisbursed() {
-        String sql = "SELECT SUM(amount) FROM loans WHERE status IN ('DISBURSED','CLOSED')";
-        try (Statement st = conn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            if (rs.next())
-                return rs.getDouble(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0.0;
-    }
-
     private Loan mapLoan(ResultSet rs) throws SQLException {
         Loan l = new Loan();
         l.setId(rs.getInt("id"));

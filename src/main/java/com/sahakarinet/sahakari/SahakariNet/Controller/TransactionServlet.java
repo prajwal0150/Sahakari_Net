@@ -1,5 +1,7 @@
 package com.sahakarinet.sahakari.SahakariNet.Controller;
 
+import com.sahakarinet.sahakari.SahakariNet.model.Loan;
+import com.sahakarinet.sahakari.SahakariNet.model.LoanRepayment;
 import com.sahakarinet.sahakari.SahakariNet.model.Transaction;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
@@ -142,7 +144,7 @@ public class TransactionServlet extends HttpServlet {
                         return;
                     }
 
-                    var repayment = lrDAO.findById(repaymentId);
+                    LoanRepayment repayment = lrDAO.findById(repaymentId);
                     if (repayment == null || repayment.getLoanId() != loanId) {
                         res.sendRedirect(
                                 ctx + "/staff?page=repayment&memberId=" + memberId + "&error=invalidRepayment");
@@ -163,7 +165,7 @@ public class TransactionServlet extends HttpServlet {
                     lrDAO.recordPayment(repaymentId, amount);
 
                     // Check if all instalments paid → close loan
-                    var loan = loanDAO.findById(loanId);
+                    Loan loan = loanDAO.findById(loanId);
                     if (loan == null) {
                         res.sendRedirect(ctx + "/staff?page=repayment&memberId=" + memberId + "&error=loanNotFound");
                         return;

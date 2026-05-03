@@ -251,11 +251,12 @@ public class StaffServlet extends HttpServlet {
 
                     if (selectedMember != null) {
                         req.setAttribute("member", selectedMember);
-                        var loans = loanDAO.getByMemberId(selectedMember.getId());
+                        List<com.sahakarinet.sahakari.SahakariNet.model.Loan> loans = loanDAO
+                                .getByMemberId(selectedMember.getId());
                         req.setAttribute("loans", loans);
 
                         java.util.Map<Integer, Object> nextDueByLoan = new java.util.HashMap<>();
-                        for (var loan : loans) {
+                        for (com.sahakarinet.sahakari.SahakariNet.model.Loan loan : loans) {
                             if ("DISBURSED".equals(loan.getStatus())) {
                                 nextDueByLoan.put(loan.getId(), lrDAO.findNextDue(loan.getId()));
                             }

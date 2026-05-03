@@ -4,6 +4,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.User;
 import com.sahakarinet.sahakari.SahakariNet.model.Member;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
+import com.sahakarinet.sahakari.SahakariNet.utils.CookieUtil;
 import com.sahakarinet.sahakari.SahakariNet.utils.SessionUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +13,8 @@ import java.io.IOException;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
+
+    private static final int AUTH_COOKIE_MAX_AGE_SECONDS = 8 * 60 * 60;
 
     private UserDao userDAO = new UserDao();
     private MemberDao memberDAO = new MemberDao();
@@ -74,13 +77,23 @@ public class LoginServlet extends HttpServlet {
 
         // Create session
         SessionUtil.setUserSession(req, user.getId(), user.getUsername(), user.getRole());
+        CookieUtil.addCookie(res, CookieUtil.COOKIE_USER_ID, String.valueOf(user.getId()), AUTH_COOKIE_MAX_AGE_SECONDS);
+        CookieUtil.addCookie(res, CookieUtil.COOKIE_USERNAME, user.getUsername(), AUTH_COOKIE_MAX_AGE_SECONDS);
+        CookieUtil.addCookie(res, CookieUtil.COOKIE_ROLE, user.getRole(), AUTH_COOKIE_MAX_AGE_SECONDS);
 
         // If member, also store memberId
         if ("MEMBER".equals(user.getRole())) {
             Member member = memberDAO.findByUserId(user.getId());
             if (member != null) {
                 SessionUtil.setMemberSession(req, member.getId(), member.getFullName());
+                CookieUtil.addCookie(res, CookieUtil.COOKIE_MEMBER_ID, String.valueOf(member.getId()),
+                        AUTH_COOKIE_MAX_AGE_SECONDS);
+                CookieUtil.addCookie(res, CookieUtil.COOKIE_MEMBER_NAME, member.getFullName(),
+                        AUTH_COOKIE_MAX_AGE_SECONDS);
             }
+        } else {
+            CookieUtil.deleteCookie(res, CookieUtil.COOKIE_MEMBER_ID);
+            CookieUtil.deleteCookie(res, CookieUtil.COOKIE_MEMBER_NAME);
         }
 
         redirectByRole(user.getRole(), req, res);

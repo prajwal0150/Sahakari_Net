@@ -6,6 +6,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtil {
 
+    public static final String COOKIE_USER_ID = "userId";
+    public static final String COOKIE_USERNAME = "username";
+    public static final String COOKIE_ROLE = "role";
+    public static final String COOKIE_MEMBER_ID = "memberId";
+    public static final String COOKIE_MEMBER_NAME = "memberName";
+
     private CookieUtil() {
     }
 
@@ -50,5 +56,13 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+    }
+
+    public static void clearAuthCookies(HttpServletResponse response) {
+        deleteCookie(response, COOKIE_USER_ID);
+        deleteCookie(response, COOKIE_USERNAME);
+        deleteCookie(response, COOKIE_ROLE);
+        deleteCookie(response, COOKIE_MEMBER_ID);
+        deleteCookie(response, COOKIE_MEMBER_NAME);
     }
 }
