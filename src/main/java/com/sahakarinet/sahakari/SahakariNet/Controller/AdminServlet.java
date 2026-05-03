@@ -269,18 +269,16 @@ public class AdminServlet extends HttpServlet {
                         break;
                     }
 
-                    if (!ValidationUtil.isValidAddress(normalizedPermanentAddress)
-                            || !ValidationUtil.isValidAddress(normalizedTemporaryAddress)) {
-                        res.sendRedirect(ctx + "/admin?page=staff&error=invalidAddress");
+   
+
+                    // Check email uniqueness first to ensure correct error messaging
+                    if (userDAO.emailExists(normalizedEmail)) {
+                        res.sendRedirect(ctx + "/admin?page=staff&error=emailExists");
                         break;
                     }
 
                     if (userDAO.usernameExists(normalizedUsername)) {
                         res.sendRedirect(ctx + "/admin?page=staff&error=usernameExists");
-                        break;
-                    }
-                    if (userDAO.emailExists(normalizedEmail)) {
-                        res.sendRedirect(ctx + "/admin?page=staff&error=emailExists");
                         break;
                     }
 
@@ -294,13 +292,7 @@ public class AdminServlet extends HttpServlet {
                         break;
                     }
 
-                    if (memberDAO.addressExists(normalizedPermanentAddress)
-                            || memberDAO.addressExists(normalizedTemporaryAddress)
-                            || staffDAO.addressExists(normalizedPermanentAddress)
-                            || staffDAO.addressExists(normalizedTemporaryAddress)) {
-                        res.sendRedirect(ctx + "/admin?page=staff&error=addressExists");
-                        break;
-                    }
+                    // address uniqueness checks removed
 
                     if (memberDAO.citizenshipExists(normalizedCitizenship)
                             || staffDAO.citizenshipExists(normalizedCitizenship)) {

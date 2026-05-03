@@ -22,4 +22,5 @@ public class InterestCalculator {
         return Math.round((balance * annualRatePercent / 100.0 * months / 12.0) * 100.0) / 100.0;
     }
 
+
 }

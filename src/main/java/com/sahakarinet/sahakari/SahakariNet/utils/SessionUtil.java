@@ -5,8 +5,6 @@ import jakarta.servlet.http.HttpSession;
 
 public class SessionUtil {
 
-    private SessionUtil() {
-    }
 
     private static HttpSession getSession(HttpServletRequest request, boolean create) {
         return request != null ? request.getSession(create) : null;
