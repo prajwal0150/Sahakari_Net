@@ -69,6 +69,14 @@
     <!-- RIGHT SIDE -->
     <div class="w-full md:w-3/5 p-10 md:p-16 flex flex-col justify-center">
 
+        <% String error = (String) request.getAttribute("error"); %>
+        <% if (error != null && !error.isBlank()) { %>
+        <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+            <span class="font-semibold">!</span>
+            <span><%= error %></span>
+        </div>
+        <% } %>
+
         <% if ("true".equals(request.getParameter("logout"))) { %>
         <div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
             ✓ You have been logged out successfully.

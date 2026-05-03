@@ -60,14 +60,14 @@ public class LoginServlet extends HttpServlet {
             }
         }
 
-        if (!userDAO.verifyAndUpgradePassword(user, password)) {
-            req.setAttribute("error", "Invalid username or password.");
+        if (user != null && !user.isActive()) {
+            req.setAttribute("error", "Your account is not approved by the admin yet.");
             req.getRequestDispatcher("login.jsp").forward(req, res);
             return;
         }
 
-        if (!user.isActive()) {
-            req.setAttribute("error", "Your account is pending approval by the Admin. Please wait.");
+        if (!userDAO.verifyAndUpgradePassword(user, password)) {
+            req.setAttribute("error", "Invalid username or password.");
             req.getRequestDispatcher("login.jsp").forward(req, res);
             return;
         }
