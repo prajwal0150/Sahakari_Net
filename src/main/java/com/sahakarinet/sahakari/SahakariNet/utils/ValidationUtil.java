@@ -29,8 +29,4 @@ public class ValidationUtil {
         return citizenshipNo != null && citizenshipNo.matches("^[0-9\\-/]{5,30}$");
     }
 
-    public static boolean isValidAddress(String address) {
-        return address != null && address.matches("^[A-Za-z0-9][A-Za-z0-9\\s,./#-]{4,254}$");
-    }
-
 }

@@ -96,12 +96,6 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        if (!ValidationUtil.isValidAddress(normalizedAddress)) {
-            req.setAttribute("error", "Invalid address format.");
-            req.getRequestDispatcher("register.jsp").forward(req, res);
-            return;
-        }
-
         if (!ValidationUtil.isValidCitizenshipNo(normalizedCitizenship)) {
             req.setAttribute("error", "Invalid citizenship number format.");
             req.getRequestDispatcher("register.jsp").forward(req, res);
@@ -132,11 +126,8 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        if (memberDAO.addressExists(normalizedAddress) || staffDAO.addressExists(normalizedAddress)) {
-            req.setAttribute("error", "Address is already registered.");
-            req.getRequestDispatcher("register.jsp").forward(req, res);
-            return;
-        }
+        // Address format and uniqueness checks removed: multiple users may share the
+        // same address
 
         if (memberDAO.citizenshipExists(normalizedCitizenship) || staffDAO.citizenshipExists(normalizedCitizenship)) {
             req.setAttribute("error", "Citizenship number is already registered.");
