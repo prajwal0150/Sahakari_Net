@@ -1,12 +1,16 @@
 package com.sahakarinet.sahakari.SahakariNet.utils;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtil {
 
-    public static final String COOKIE_USER_ID = "userId";
+   public static final String COOKIE_USER_ID = "userId";
     public static final String COOKIE_USERNAME = "username";
     public static final String COOKIE_ROLE = "role";
     public static final String COOKIE_MEMBER_ID = "memberId";
@@ -18,7 +22,9 @@ public class CookieUtil {
         if (response == null || name == null) {
             return;
         }
-        Cookie cookie = new Cookie(name, value == null ? "" : value);
+        String cleanValue = (value == null) ? "" : value;
+        String encodedValue = URLEncoder.encode(cleanValue, StandardCharsets.UTF_8);
+        Cookie cookie = new Cookie(name, encodedValue);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAgeSeconds);
@@ -35,6 +41,10 @@ public class CookieUtil {
         }
         for (Cookie cookie : cookies) {
             if (cookie != null && name.equals(cookie.getName())) {
+                if (cookie.getValue() != null) {
+                    String decodedValue = URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
+                    cookie.setValue(decodedValue);
+                }
                 return cookie;
             }
         }
