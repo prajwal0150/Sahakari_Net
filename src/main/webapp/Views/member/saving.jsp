@@ -22,8 +22,8 @@
                     <div class="text-xs text-green-300 mt-2">Interest rate: ${savings.interestRate}% per year</div>
                 </div>
                 <div class="bg-white rounded-2xl border border-gray-100 p-6">
-                    <div class="text-xs text-gray-400 mb-2">Share Capital</div>
-                    <div class="text-2xl font-extrabold text-gray-900">Rs. <fmt:formatNumber value="${savings.shareCapital}" pattern="#,##0"/></div>
+                    <div class="text-xs text-gray-400 mb-2">Share Capital (Rs.)</div>
+                    <div class="text-2xl font-extrabold text-gray-900">Rs. <fmt:formatNumber value="${savings.shareCapital}" pattern="#,##0.00"/></div>
                     <div class="text-xs text-gray-400 mt-1">Fixed membership share</div>
                 </div>
             </div>

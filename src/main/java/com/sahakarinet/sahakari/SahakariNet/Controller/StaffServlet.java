@@ -6,6 +6,7 @@ import com.sahakarinet.sahakari.SahakariNet.model.dao.StaffDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.LoanRepaymentDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.MemberDao;
+import com.sahakarinet.sahakari.SahakariNet.model.SavingsAccount;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.SavingAcountDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.TransactionDao;
 import com.sahakarinet.sahakari.SahakariNet.model.dao.UserDao;
@@ -115,7 +116,14 @@ public class StaffServlet extends HttpServlet {
                     }
                     Member member = memberDAO.findById(memberId);
                     req.setAttribute("member", member);
-                    req.setAttribute("savings", saDAO.getByMemberId(memberId));
+
+                    SavingsAccount savings = saDAO.getByMemberId(memberId);
+                    if (savings == null) {
+                        // create default savings account row if missing
+                        saDAO.createAccount(memberId);
+                        savings = saDAO.getByMemberId(memberId);
+                    }
+                    req.setAttribute("savings", savings);
                     req.setAttribute("loans", loanDAO.getByMemberId(memberId));
                     req.setAttribute("recentTx", txDAO.getRecent(memberId, 10));
                     req.getRequestDispatcher("/Views/staff/member_detail.jsp").forward(req, res);
@@ -145,7 +153,13 @@ public class StaffServlet extends HttpServlet {
                     req.setAttribute("memberSearchMembers", memberSearchMembers);
                     if (selectedMember != null) {
                         req.setAttribute("member", selectedMember);
-                        req.setAttribute("savings", saDAO.getByMemberId(selectedMember.getId()));
+
+                        SavingsAccount savings = saDAO.getByMemberId(selectedMember.getId());
+                        if (savings == null) {
+                            saDAO.createAccount(selectedMember.getId());
+                            savings = saDAO.getByMemberId(selectedMember.getId());
+                        }
+                        req.setAttribute("savings", savings);
                     }
 
                     req.setAttribute("depositHistory",
@@ -179,7 +193,13 @@ public class StaffServlet extends HttpServlet {
                     req.setAttribute("memberSearchMembers", memberSearchMembers);
                     if (selectedMember != null) {
                         req.setAttribute("member", selectedMember);
-                        req.setAttribute("savings", saDAO.getByMemberId(selectedMember.getId()));
+
+                        SavingsAccount savings = saDAO.getByMemberId(selectedMember.getId());
+                        if (savings == null) {
+                            saDAO.createAccount(selectedMember.getId());
+                            savings = saDAO.getByMemberId(selectedMember.getId());
+                        }
+                        req.setAttribute("savings", savings);
                     }
 
                     req.setAttribute("withdrawalHistory",

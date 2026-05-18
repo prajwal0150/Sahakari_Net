@@ -43,7 +43,7 @@
                         <div class="text-2xl font-extrabold text-green-700">Rs. <fmt:formatNumber value="${savings.balance}" pattern="#,##0.00"/></div>
                     </div>
                     <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
-                        <div class="text-xs text-gray-400 mb-1">Share Capital</div>
+                        <div class="text-xs text-gray-400 mb-1">Share Capital (Rs.)</div>
                         <div class="text-2xl font-extrabold text-gray-900">Rs. <fmt:formatNumber value="${savings.shareCapital}" pattern="#,##0.00"/></div>
                     </div>
                     <div class="bg-white rounded-2xl border border-gray-100 p-5 text-center">
