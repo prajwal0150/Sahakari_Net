@@ -7,13 +7,12 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
-# Run stage
-FROM eclipse-temurin:17
+# Run stage (deploy WAR to Tomcat)
+FROM tomcat:10.1-jdk17-temurin
 
-WORKDIR /app
-
-COPY --from=build /app/target/*.war app.war
+# Deploy as ROOT app so it serves at /
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "app.war"]
+CMD ["catalina.sh", "run"]
