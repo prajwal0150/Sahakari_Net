@@ -1,19 +1,9 @@
-FROM eclipse-temurin:17 AS build
+FROM tomcat:10.1-jdk17
 
-WORKDIR /app
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-COPY . .
+COPY target/SahakariNet-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
-RUN chmod +x mvnw
-RUN ./mvnw clean package -DskipTests
+EXPOSE 8080
 
-
-FROM eclipse-temurin:17
-
-WORKDIR /app
-
-COPY --from=build /app/target /app/target
-
-EXPOSE 8081
-
-CMD sh -c "java -jar $(find /app/target -name '*.jar' | head -n 1)"
+CMD ["catalina.sh", "run"]
