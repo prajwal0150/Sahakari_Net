@@ -1,9 +1,9 @@
-FROM tomcat:10.1-jdk17
+FROM eclipse-temurin:17
 
-RUN rm -rf /usr/local/tomcat/webapps/*
+WORKDIR /app
 
-COPY target/SahakariNet-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+COPY target/*.war app.war
 
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+CMD ["java", "-jar", "app.war"]
