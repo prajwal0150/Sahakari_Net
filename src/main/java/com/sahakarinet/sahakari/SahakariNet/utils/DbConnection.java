@@ -10,15 +10,57 @@ public class DbConnection {
     private static final String DEFAULT_PASS = "12345";
 
     private static String dbUrl() {
-        return firstNonBlank(System.getenv("DB_URL"), System.getenv("JDBC_DATABASE_URL"), DEFAULT_URL);
+        String url = firstNonBlank(
+                System.getenv("DB_URL"),
+                System.getenv("JDBC_DATABASE_URL"),
+                buildRailwayUrl(),
+                jdbcFromMysqlUrl(System.getenv("MYSQL_URL")));
+        return url != null ? url : DEFAULT_URL;
     }
 
     private static String dbUser() {
-        return firstNonBlank(System.getenv("DB_USER"), System.getenv("JDBC_DATABASE_USERNAME"), DEFAULT_USER);
+        String user = firstNonBlank(
+                System.getenv("DB_USER"),
+                System.getenv("JDBC_DATABASE_USERNAME"),
+                System.getenv("MYSQLUSER"));
+        return user != null ? user : DEFAULT_USER;
     }
 
     private static String dbPass() {
-        return firstNonBlank(System.getenv("DB_PASSWORD"), System.getenv("JDBC_DATABASE_PASSWORD"), DEFAULT_PASS);
+        String password = firstNonBlank(
+                System.getenv("DB_PASSWORD"),
+                System.getenv("JDBC_DATABASE_PASSWORD"),
+                System.getenv("MYSQLPASSWORD"));
+        return password != null ? password : DEFAULT_PASS;
+    }
+
+    private static String buildRailwayUrl() {
+        String host = System.getenv("MYSQLHOST");
+        String port = firstNonBlank(System.getenv("MYSQLPORT"), "3306");
+        String database = System.getenv("MYSQLDATABASE");
+
+        if (host == null || host.isBlank() || database == null || database.isBlank()) {
+            return null;
+        }
+
+        return "jdbc:mysql://" + host + ":" + port + "/" + database
+                + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8";
+    }
+
+    private static String jdbcFromMysqlUrl(String mysqlUrl) {
+        if (mysqlUrl == null || mysqlUrl.isBlank()) {
+            return null;
+        }
+
+        if (mysqlUrl.startsWith("jdbc:mysql://")) {
+            return mysqlUrl;
+        }
+
+        if (mysqlUrl.startsWith("mysql://")) {
+            return "jdbc:" + mysqlUrl;
+        }
+
+        return mysqlUrl;
     }
 
     private static String firstNonBlank(String... values) {
