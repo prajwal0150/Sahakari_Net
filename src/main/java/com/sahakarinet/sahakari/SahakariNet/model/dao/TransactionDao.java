@@ -20,7 +20,7 @@ public class TransactionDao {
 
     public boolean addTransaction(Transaction t) {
         String sql = "INSERT INTO transactions (member_id, type, amount, balance_after, description, loan_id, recorded_by) VALUES (?,?,?,?,?,?,?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, t.getMemberId());
             ps.setString(2, t.getType());
             ps.setDouble(3, t.getAmount());
@@ -43,11 +43,12 @@ public class TransactionDao {
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id WHERE t.member_id = ? ORDER BY t.transaction_date DESC";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, memberId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapTx(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -59,7 +60,9 @@ public class TransactionDao {
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id ORDER BY t.transaction_date DESC LIMIT 200";
-        try (Statement st = conn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Connection connection = conn();
+                Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next())
                 list.add(mapTx(rs));
         } catch (SQLException e) {
@@ -73,12 +76,13 @@ public class TransactionDao {
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id WHERE t.member_id = ? ORDER BY t.transaction_date DESC LIMIT ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, memberId);
             ps.setInt(2, limit);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapTx(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -90,11 +94,12 @@ public class TransactionDao {
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id WHERE t.type = ? ORDER BY t.transaction_date DESC LIMIT 50";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, type);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapTx(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -106,12 +111,13 @@ public class TransactionDao {
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id WHERE t.type = ? ORDER BY t.transaction_date DESC LIMIT ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, type);
             ps.setInt(2, limit);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapTx(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -124,13 +130,14 @@ public class TransactionDao {
                 "FROM transactions t JOIN members m ON t.member_id = m.id " +
                 "JOIN users u ON t.recorded_by = u.id " +
                 "WHERE t.type = ? AND t.member_id = ? ORDER BY t.transaction_date DESC LIMIT ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, type);
             ps.setInt(2, memberId);
             ps.setInt(3, limit);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapTx(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -139,11 +146,12 @@ public class TransactionDao {
 
     public int countTodayByStaff(int staffUserId) {
         String sql = "SELECT COUNT(*) FROM transactions WHERE recorded_by = ? AND DATE(transaction_date) = CURDATE()";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, staffUserId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return rs.getInt(1);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

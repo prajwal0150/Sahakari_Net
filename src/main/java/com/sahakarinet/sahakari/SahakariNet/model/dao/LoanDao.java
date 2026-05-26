@@ -19,7 +19,8 @@ public class LoanDao {
 
     public int applyLoan(Loan loan) {
         String sql = "INSERT INTO loans (member_id, amount, purpose, status, interest_rate, duration_months, monthly_emi) VALUES (?,?,?,?,?,?,?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = conn();
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, loan.getMemberId());
             ps.setDouble(2, loan.getAmount());
             ps.setString(3, loan.getPurpose());
@@ -28,9 +29,10 @@ public class LoanDao {
             ps.setInt(6, loan.getDurationMonths());
             ps.setDouble(7, loan.getMonthlyEmi());
             ps.executeUpdate();
-            ResultSet keys = ps.getGeneratedKeys();
-            if (keys.next())
-                return keys.getInt(1);
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next())
+                    return keys.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -42,11 +44,12 @@ public class LoanDao {
                 "u.username AS approved_by_name FROM loans l " +
                 "JOIN members m ON l.member_id = m.id " +
                 "LEFT JOIN users u ON l.approved_by = u.id WHERE l.id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return mapLoan(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return mapLoan(rs);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -59,7 +62,9 @@ public class LoanDao {
                 "u.username AS approved_by_name FROM loans l " +
                 "JOIN members m ON l.member_id = m.id " +
                 "LEFT JOIN users u ON l.approved_by = u.id ORDER BY l.applied_date DESC";
-        try (Statement st = conn().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try (Connection connection = conn();
+                Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next())
                 list.add(mapLoan(rs));
         } catch (SQLException e) {
@@ -74,11 +79,12 @@ public class LoanDao {
                 "u.username AS approved_by_name FROM loans l " +
                 "JOIN members m ON l.member_id = m.id " +
                 "LEFT JOIN users u ON l.approved_by = u.id WHERE l.member_id = ? ORDER BY l.applied_date DESC";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, memberId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapLoan(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapLoan(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -91,11 +97,12 @@ public class LoanDao {
                 "u.username AS approved_by_name FROM loans l " +
                 "JOIN members m ON l.member_id = m.id " +
                 "LEFT JOIN users u ON l.approved_by = u.id WHERE l.status = ? ORDER BY l.applied_date DESC";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next())
-                list.add(mapLoan(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapLoan(rs));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -104,7 +111,7 @@ public class LoanDao {
 
     public boolean approve(int loanId, int adminUserId) {
         String sql = "UPDATE loans SET status = 'APPROVED', approved_by = ?, approved_date = NOW() WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, adminUserId);
             ps.setInt(2, loanId);
             return ps.executeUpdate() > 0;
@@ -116,7 +123,7 @@ public class LoanDao {
 
     public boolean reject(int loanId, int adminUserId) {
         String sql = "UPDATE loans SET status = 'REJECTED', approved_by = ? WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, adminUserId);
             ps.setInt(2, loanId);
             return ps.executeUpdate() > 0;
@@ -128,7 +135,7 @@ public class LoanDao {
 
     public boolean disburse(int loanId) {
         String sql = "UPDATE loans SET status = 'DISBURSED', disbursed_date = NOW() WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, loanId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -139,7 +146,7 @@ public class LoanDao {
 
     public boolean closeLoan(int loanId) {
         String sql = "UPDATE loans SET status = 'CLOSED' WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, loanId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -150,11 +157,12 @@ public class LoanDao {
 
     public int countByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM loans WHERE status = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return rs.getInt(1);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

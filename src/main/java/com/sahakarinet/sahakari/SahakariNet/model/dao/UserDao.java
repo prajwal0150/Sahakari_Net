@@ -15,11 +15,12 @@ public class UserDao {
 
     public User findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return mapUser(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return mapUser(rs);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -28,11 +29,12 @@ public class UserDao {
 
     public User findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return mapUser(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return mapUser(rs);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -41,11 +43,12 @@ public class UserDao {
 
     public User findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return mapUser(rs);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return mapUser(rs);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -54,11 +57,12 @@ public class UserDao {
 
     public boolean usernameExists(String username) {
         String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, username);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt(1) > 0;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -67,11 +71,12 @@ public class UserDao {
 
     public boolean emailExists(String email) {
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt(1) > 0;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -81,16 +86,18 @@ public class UserDao {
     /** Returns new user ID or -1 on failure */
     public int createUser(User user) {
         String sql = "INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?,?,?,?,?)";
-        try (PreparedStatement ps = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = conn();
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPasswordHash());
             ps.setString(4, user.getRole());
             ps.setBoolean(5, user.isActive());
             ps.executeUpdate();
-            ResultSet keys = ps.getGeneratedKeys();
-            if (keys.next())
-                return keys.getInt(1);
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next())
+                    return keys.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -99,7 +106,7 @@ public class UserDao {
 
     public boolean activateUser(int userId) {
         String sql = "UPDATE users SET is_active = TRUE WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -110,7 +117,7 @@ public class UserDao {
 
     public boolean deactivateUser(int userId) {
         String sql = "UPDATE users SET is_active = FALSE WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -121,7 +128,7 @@ public class UserDao {
 
     public boolean deleteUser(int userId) {
         String sql = "DELETE FROM users WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -133,8 +140,9 @@ public class UserDao {
     public List<User> getStaffUsers() {
         List<User> staffUsers = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE role = 'STAFF' ORDER BY id DESC";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
+        try (Connection connection = conn();
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 staffUsers.add(mapUser(rs));
             }
@@ -188,7 +196,7 @@ public class UserDao {
 
     private boolean updatePasswordHash(int userId, String newHash) {
         String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
-        try (PreparedStatement ps = conn().prepareStatement(sql)) {
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, newHash);
             ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
