@@ -15,6 +15,7 @@ public class DbConnection {
     private static String dbUrl() {
         String url = normalizeJdbcUrl(firstNonBlank(
                 System.getenv("SPRING_DATASOURCE_URL"),
+                System.getenv("DATABASE_URL"),
                 System.getenv("DB_URL"),
                 System.getenv("JDBC_DATABASE_URL"),
                 buildRailwayUrl(),
@@ -25,9 +26,11 @@ public class DbConnection {
     private static String dbUser() {
         String user = firstNonBlank(
                 System.getenv("SPRING_DATASOURCE_USERNAME"),
+                System.getenv("DATABASE_USERNAME"),
                 System.getenv("DB_USER"),
                 System.getenv("JDBC_DATABASE_USERNAME"),
                 embeddedUserFromUrl(System.getenv("SPRING_DATASOURCE_URL")),
+                embeddedUserFromUrl(System.getenv("DATABASE_URL")),
                 embeddedUserFromUrl(System.getenv("DB_URL")),
                 embeddedUserFromUrl(System.getenv("JDBC_DATABASE_URL")),
                 embeddedUserFromUrl(buildRailwayUrl()),
@@ -39,9 +42,11 @@ public class DbConnection {
     private static String dbPass() {
         String password = firstNonBlank(
                 System.getenv("SPRING_DATASOURCE_PASSWORD"),
+                System.getenv("DATABASE_PASSWORD"),
                 System.getenv("DB_PASSWORD"),
                 System.getenv("JDBC_DATABASE_PASSWORD"),
                 embeddedPasswordFromUrl(System.getenv("SPRING_DATASOURCE_URL")),
+                embeddedPasswordFromUrl(System.getenv("DATABASE_URL")),
                 embeddedPasswordFromUrl(System.getenv("DB_URL")),
                 embeddedPasswordFromUrl(System.getenv("JDBC_DATABASE_URL")),
                 embeddedPasswordFromUrl(buildRailwayUrl()),
@@ -194,7 +199,10 @@ public class DbConnection {
         config.setMinimumIdle(1);
         config.setConnectionTimeout(5000);
         config.setIdleTimeout(600000);
-        config.setMaxLifetime(1800000);
+        config.setKeepaliveTime(120000);
+        config.setMaxLifetime(240000);
+        config.setValidationTimeout(3000);
+        config.setConnectionTestQuery("SELECT 1");
         config.setPoolName("SahakariNetPool");
         return new HikariDataSource(config);
     }
