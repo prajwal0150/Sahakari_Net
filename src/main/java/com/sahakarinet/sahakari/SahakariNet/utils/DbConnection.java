@@ -10,7 +10,7 @@ public class DbConnection {
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/sahakarinet";
     private static final String DEFAULT_USER = "root";
     private static final String DEFAULT_PASS = "12345";
-    private static final HikariDataSource DATA_SOURCE = createDataSource();
+    private static volatile HikariDataSource DATA_SOURCE = createDataSource();
 
     private static String dbUrl() {
         String url = normalizeJdbcUrl(firstNonBlank(
@@ -196,21 +196,42 @@ public class DbConnection {
         config.setPassword(dbPass());
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(Integer.parseInt(firstNonBlank(System.getenv("DB_POOL_SIZE"), "5")));
-        config.setMinimumIdle(1);
-        config.setConnectionTimeout(5000);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(10000);
         config.setIdleTimeout(600000);
-        config.setKeepaliveTime(120000);
-        config.setMaxLifetime(240000);
+        config.setKeepaliveTime(60000);
+        config.setMaxLifetime(300000);
         config.setValidationTimeout(3000);
         config.setConnectionTestQuery("SELECT 1");
+        config.setInitializationFailTimeout(-1);
         config.setPoolName("SahakariNetPool");
         return new HikariDataSource(config);
+    }
+
+    private static synchronized HikariDataSource dataSource() {
+        if (DATA_SOURCE == null || DATA_SOURCE.isClosed()) {
+            DATA_SOURCE = createDataSource();
+        }
+        return DATA_SOURCE;
+    }
+
+    private static synchronized void refreshDataSource() {
+        HikariDataSource current = DATA_SOURCE;
+        DATA_SOURCE = createDataSource();
+        if (current != null && !current.isClosed()) {
+            current.close();
+        }
     }
 
     // creates database connection and return
     // uses throws SQLException for handle error or connection fails
     public static Connection getConnection() throws SQLException {
-        return DATA_SOURCE.getConnection();
+        try {
+            return dataSource().getConnection();
+        } catch (SQLException firstFailure) {
+            refreshDataSource();
+            return dataSource().getConnection();
+        }
     }
 
     // Test database connection status
