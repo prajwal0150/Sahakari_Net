@@ -1,13 +1,16 @@
 package com.sahakarinet.sahakari.SahakariNet.utils;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DbConnection {
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/sahakarinet";
     private static final String DEFAULT_USER = "root";
     private static final String DEFAULT_PASS = "12345";
+    private static final HikariDataSource DATA_SOURCE = createDataSource();
 
     private static String dbUrl() {
         String url = firstNonBlank(
@@ -75,17 +78,25 @@ public class DbConnection {
         return null;
     }
 
+    private static HikariDataSource createDataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(dbUrl());
+        config.setUsername(dbUser());
+        config.setPassword(dbPass());
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setMaximumPoolSize(Integer.parseInt(firstNonBlank(System.getenv("DB_POOL_SIZE"), "5")));
+        config.setMinimumIdle(1);
+        config.setConnectionTimeout(15000);
+        config.setIdleTimeout(600000);
+        config.setMaxLifetime(1800000);
+        config.setPoolName("SahakariNetPool");
+        return new HikariDataSource(config);
+    }
+
     // creates database connection and return
     // uses throws SQLException for handle error or connection fails
     public static Connection getConnection() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-        } catch (ClassNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
-        Connection conec = DriverManager.getConnection(dbUrl(), dbUser(), dbPass());
-        return conec;
+        return DATA_SOURCE.getConnection();
     }
 
     // Test database connection status

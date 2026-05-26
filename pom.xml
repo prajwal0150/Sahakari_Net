@@ -54,6 +54,13 @@
             <version>8.3.0</version>
         </dependency>
 
+        <!-- Connection pool for faster database access -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
         <!-- BCrypt for password hashing -->
         <dependency>
             <groupId>org.mindrot</groupId>
