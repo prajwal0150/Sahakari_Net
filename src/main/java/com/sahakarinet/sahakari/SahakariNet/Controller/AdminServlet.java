@@ -44,11 +44,7 @@ public class AdminServlet extends HttpServlet {
                 case "dashboard": {
                     Map<String, Object> stats = reportDAO.getDashboardStats();
                     req.setAttribute("stats", stats);
-                    req.setAttribute("staffCount", staffDAO.getAll().size());
-                    req.setAttribute("pendingLoans", loanDAO.getByStatus("PENDING"));
-                    req.setAttribute("pendingMembers", memberDAO.getPending());
-                    req.setAttribute("recentTransactions", transactionDAO.getAll());
-                    req.setAttribute("severeDefaulters", repaymentDAO.countOverdueDefaulters(90));
+                    req.setAttribute("staffCount", staffDAO.countAll());
                     req.getRequestDispatcher("/Views/admin/dashboard.jsp").forward(req, res);
                     break;
                 }
@@ -268,8 +264,6 @@ public class AdminServlet extends HttpServlet {
                         res.sendRedirect(ctx + "/admin?page=staff&error=invalidCitizenship");
                         break;
                     }
-
-   
 
                     // Check email uniqueness first to ensure correct error messaging
                     if (userDAO.emailExists(normalizedEmail)) {

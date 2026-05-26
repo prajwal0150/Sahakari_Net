@@ -71,6 +71,23 @@ public class TransactionDao {
         return list;
     }
 
+    public List<Transaction> getLatest(int limit) {
+        List<Transaction> list = new ArrayList<>();
+        String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +
+                "FROM transactions t JOIN members m ON t.member_id = m.id " +
+                "JOIN users u ON t.recorded_by = u.id ORDER BY t.transaction_date DESC LIMIT ?";
+        try (Connection connection = conn(); PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    list.add(mapTx(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public List<Transaction> getRecent(int memberId, int limit) {
         List<Transaction> list = new ArrayList<>();
         String sql = "SELECT t.*, m.full_name AS member_name, u.username AS recorded_by_name " +

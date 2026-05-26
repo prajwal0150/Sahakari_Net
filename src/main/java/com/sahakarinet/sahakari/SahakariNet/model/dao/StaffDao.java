@@ -126,6 +126,21 @@ public class StaffDao {
         return staffList;
     }
 
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'STAFF'";
+        try (Connection c = conn()) {
+            ensureStaffProfileTable(c);
+            try (PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public boolean fullNameExists(String fullName) {
         String sql = "SELECT COUNT(*) FROM staff_profiles WHERE LOWER(full_name) = LOWER(?)";
         try (Connection c = conn()) {

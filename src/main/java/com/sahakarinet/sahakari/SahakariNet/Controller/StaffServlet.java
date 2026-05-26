@@ -79,7 +79,7 @@ public class StaffServlet extends HttpServlet {
                     req.setAttribute("todayCount", txDAO.countTodayByStaff(uid));
                     req.setAttribute("totalMembers", memberDAO.countByStatus("APPROVED"));
                     req.setAttribute("activeLoans", loanDAO.countByStatus("DISBURSED"));
-                    req.setAttribute("recentTx", txDAO.getAll().stream().limit(10).toList());
+                    req.setAttribute("recentTx", txDAO.getLatest(10));
                     req.getRequestDispatcher("/Views/staff/dashboard.jsp").forward(req, res);
                     break;
                 }
