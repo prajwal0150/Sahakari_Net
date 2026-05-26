@@ -11,6 +11,7 @@ public class DbConnection {
 
     private static String dbUrl() {
         String url = firstNonBlank(
+                System.getenv("SPRING_DATASOURCE_URL"),
                 System.getenv("DB_URL"),
                 System.getenv("JDBC_DATABASE_URL"),
                 buildRailwayUrl(),
@@ -20,6 +21,7 @@ public class DbConnection {
 
     private static String dbUser() {
         String user = firstNonBlank(
+                System.getenv("SPRING_DATASOURCE_USERNAME"),
                 System.getenv("DB_USER"),
                 System.getenv("JDBC_DATABASE_USERNAME"),
                 System.getenv("MYSQLUSER"));
@@ -28,6 +30,7 @@ public class DbConnection {
 
     private static String dbPass() {
         String password = firstNonBlank(
+                System.getenv("SPRING_DATASOURCE_PASSWORD"),
                 System.getenv("DB_PASSWORD"),
                 System.getenv("JDBC_DATABASE_PASSWORD"),
                 System.getenv("MYSQLPASSWORD"));
