@@ -18,9 +18,9 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-1">Record Loan Repayment</h1>
         <p class="text-gray-500 text-sm mb-6">Record monthly instalments and review repayment history</p>
 
-        <c.redirect:if test="${param.msg == 'repaid'}">
+        <c:if test="${param.msg == 'repaid'}">
             <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-5 text-sm">Repayment recorded successfully.</div>
-        </function:if>
+        </c:if>
 
         <c:set var="memberSearchTitle" value="Find member"/>
         <c:set var="memberSearchPage" value="repayment"/>
