@@ -13,12 +13,12 @@ public class DbConnection {
     private static final HikariDataSource DATA_SOURCE = createDataSource();
 
     private static String dbUrl() {
-        String url = firstNonBlank(
+        String url = normalizeJdbcUrl(firstNonBlank(
                 System.getenv("SPRING_DATASOURCE_URL"),
                 System.getenv("DB_URL"),
                 System.getenv("JDBC_DATABASE_URL"),
                 buildRailwayUrl(),
-                jdbcFromMysqlUrl(System.getenv("MYSQL_URL")));
+                System.getenv("MYSQL_URL")));
         return url != null ? url : DEFAULT_URL;
     }
 
@@ -27,6 +27,11 @@ public class DbConnection {
                 System.getenv("SPRING_DATASOURCE_USERNAME"),
                 System.getenv("DB_USER"),
                 System.getenv("JDBC_DATABASE_USERNAME"),
+                embeddedUserFromUrl(System.getenv("SPRING_DATASOURCE_URL")),
+                embeddedUserFromUrl(System.getenv("DB_URL")),
+                embeddedUserFromUrl(System.getenv("JDBC_DATABASE_URL")),
+                embeddedUserFromUrl(buildRailwayUrl()),
+                embeddedUserFromUrl(System.getenv("MYSQL_URL")),
                 System.getenv("MYSQLUSER"));
         return user != null ? user : DEFAULT_USER;
     }
@@ -36,6 +41,11 @@ public class DbConnection {
                 System.getenv("SPRING_DATASOURCE_PASSWORD"),
                 System.getenv("DB_PASSWORD"),
                 System.getenv("JDBC_DATABASE_PASSWORD"),
+                embeddedPasswordFromUrl(System.getenv("SPRING_DATASOURCE_URL")),
+                embeddedPasswordFromUrl(System.getenv("DB_URL")),
+                embeddedPasswordFromUrl(System.getenv("JDBC_DATABASE_URL")),
+                embeddedPasswordFromUrl(buildRailwayUrl()),
+                embeddedPasswordFromUrl(System.getenv("MYSQL_URL")),
                 System.getenv("MYSQLPASSWORD"));
         return password != null ? password : DEFAULT_PASS;
     }
@@ -69,6 +79,102 @@ public class DbConnection {
         return mysqlUrl;
     }
 
+    private static String normalizeJdbcUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) {
+            return null;
+        }
+
+        String normalized = rawUrl.trim();
+
+        if (normalized.startsWith("mysql://")) {
+            normalized = "jdbc:" + normalized;
+        }
+
+        if (!normalized.startsWith("jdbc:mysql://")) {
+            return normalized;
+        }
+
+        String remainder = normalized.substring("jdbc:mysql://".length());
+        int slashIndex = remainder.indexOf('/');
+        if (slashIndex < 0) {
+            return normalized;
+        }
+
+        String authority = remainder.substring(0, slashIndex);
+        String pathAndQuery = remainder.substring(slashIndex);
+
+        int atIndex = authority.lastIndexOf('@');
+        if (atIndex >= 0) {
+            authority = authority.substring(atIndex + 1);
+        }
+
+        return "jdbc:mysql://" + authority + pathAndQuery;
+    }
+
+    private static String embeddedUserFromUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) {
+            return null;
+        }
+
+        String normalized = rawUrl.trim();
+        if (normalized.startsWith("mysql://")) {
+            normalized = "jdbc:" + normalized;
+        }
+
+        if (!normalized.startsWith("jdbc:mysql://")) {
+            return null;
+        }
+
+        String remainder = normalized.substring("jdbc:mysql://".length());
+        int slashIndex = remainder.indexOf('/');
+        String authority = slashIndex >= 0 ? remainder.substring(0, slashIndex) : remainder;
+        int atIndex = authority.lastIndexOf('@');
+        if (atIndex < 0) {
+            return null;
+        }
+
+        String credentials = authority.substring(0, atIndex);
+        int colonIndex = credentials.indexOf(':');
+        if (colonIndex < 0) {
+            return credentials.isBlank() ? null : credentials;
+        }
+
+        String user = credentials.substring(0, colonIndex);
+        return user.isBlank() ? null : user;
+    }
+
+    private static String embeddedPasswordFromUrl(String rawUrl) {
+        if (rawUrl == null || rawUrl.isBlank()) {
+            return null;
+        }
+
+        String normalized = rawUrl.trim();
+        if (normalized.startsWith("mysql://")) {
+            normalized = "jdbc:" + normalized;
+        }
+
+        if (!normalized.startsWith("jdbc:mysql://")) {
+            return null;
+        }
+
+        String remainder = normalized.substring("jdbc:mysql://".length());
+        int slashIndex = remainder.indexOf('/');
+        String authority = slashIndex >= 0 ? remainder.substring(0, slashIndex) : remainder;
+        int atIndex = authority.lastIndexOf('@');
+        if (atIndex < 0) {
+            return null;
+        }
+
+        String credentials = authority.substring(0, atIndex);
+        int colonIndex = credentials.indexOf(':');
+        if (colonIndex < 0 || colonIndex == credentials.length() - 1) {
+            return null;
+        }
+
+        String password = credentials.substring(colonIndex + 1);
+        return password.isBlank() ? null : password;
+    }
+
     private static String firstNonBlank(String... values) {
         for (String value : values) {
             if (value != null && !value.isBlank()) {
@@ -86,7 +192,7 @@ public class DbConnection {
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(Integer.parseInt(firstNonBlank(System.getenv("DB_POOL_SIZE"), "5")));
         config.setMinimumIdle(1);
-        config.setConnectionTimeout(15000);
+        config.setConnectionTimeout(5000);
         config.setIdleTimeout(600000);
         config.setMaxLifetime(1800000);
         config.setPoolName("SahakariNetPool");
